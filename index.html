@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>조선 시대 노트</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&family=Noto+Serif+KR:wght@600&display=swap">
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --paper: #fffdf9;
+      --ink: #221c16;
+      --muted: #5e564c;
+      --line: #e3d9c8;
+      --early: #1f6b4a;
+      --mid: #9a4324;
+      --late: #1e4d7b;
+      --header: 7.6rem;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      word-break: keep-all;
+    }
+    a { color: #1a3f66; }
+    :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+    .skip {
+      position: absolute;
+      left: 0.6rem;
+      top: -3rem;
+      background: #fff;
+      padding: 0.4rem 0.6rem;
+      z-index: 20;
+    }
+    .skip:focus { top: 0.6rem; }
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      padding: 0.7rem 1.1rem 0.45rem;
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .brand { margin: 0; color: var(--muted); font-size: 0.78rem; }
+    h1 { margin: 0; font-family: "Noto Serif KR", Batang, serif; font-size: 1.4rem; font-weight: 600; }
+    .search { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.82rem; color: var(--muted); }
+    .search input {
+      font: inherit;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid #d5cbbd;
+      padding: 0.38rem 0.55rem;
+      width: 13rem;
+    }
+    .timeline {
+      max-width: 1120px;
+      margin: 0.45rem auto 0;
+      display: flex;
+      overflow-x: auto;
+      border-top: 1px solid var(--line);
+    }
+    .timeline a {
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.92rem;
+    }
+    .timeline a + a { box-shadow: inset 1px 0 var(--line); }
+    .timeline a.mark { color: var(--mid); font-weight: 500; }
+    .layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 1.4rem;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 1rem 1.1rem 3rem;
+    }
+    .toc {
+      position: sticky;
+      top: var(--header);
+      align-self: start;
+      max-height: calc(100vh - var(--header) - 1rem);
+      overflow: auto;
+    }
+    .toc summary { display: none; }
+    .toc nav { display: flex; flex-direction: column; gap: 0.15rem; }
+    .group {
+      margin: 0.85rem 0 0.2rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+    .toc a {
+      display: block;
+      color: var(--ink);
+      text-decoration: none;
+      padding: 0.18rem 0.4rem;
+      border-left: 2px solid transparent;
+    }
+    .toc a[aria-current="page"] { border-left-color: var(--ink); font-weight: 500; }
+    .toc a.jump { color: var(--muted); }
+    main { min-width: 0; }
+    .chapter {
+      margin: 0 0 2.4rem;
+      padding-top: 0.2rem;
+      border-top: 3px solid var(--era);
+      scroll-margin-top: var(--header);
+    }
+    .chapter[data-era="early"] { --era: var(--early); }
+    .chapter[data-era="mid"] { --era: var(--mid); }
+    .chapter[data-era="late"] { --era: var(--late); }
+    .kicker { margin: 0.7rem 0 0; color: var(--era); font-size: 0.82rem; font-weight: 500; }
+    h2, h3, h4 { font-family: "Noto Serif KR", Batang, serif; font-weight: 600; line-height: 1.35; }
+    h2 { margin: 0.1rem 0 0.9rem; font-size: 1.55rem; scroll-margin-top: var(--header); }
+    .block { margin: 0 0 1.35rem; scroll-margin-top: var(--header); }
+    h3 { margin: 0 0 0.55rem; font-size: 1.16rem; }
+    h4 { margin: 0.8rem 0 0.35rem; font-size: 1rem; }
+    p, li { max-width: 68ch; }
+    .path, .note, .table-wrap, .compare, .defs, .chips { max-width: none; }
+    .path, .note {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 0.55rem 0.75rem;
+      margin: 0.45rem 0;
+    }
+    .note { border-left: 3px solid var(--era, #c4b8a4); }
+    ul, ol { margin: 0.3rem 0 0.5rem; padding-left: 1.2rem; }
+    li { margin: 0.2rem 0; }
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+    .compare.three { grid-template-columns: repeat(3, 1fr); }
+    .compare > section {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 0.7rem 0.8rem;
+      margin: 0;
+    }
+    .compare h4 { margin-top: 0; }
+    .defs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+      gap: 0.45rem;
+      margin: 0.4rem 0 0.7rem;
+    }
+    .defs div { background: var(--paper); border: 1px solid var(--line); padding: 0.45rem 0.6rem; }
+    .defs dt { font-weight: 500; }
+    .defs dd { margin: 0; color: var(--muted); }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; padding: 0; margin: 0.3rem 0 0.6rem; list-style: none; }
+    .chips li { margin: 0; max-width: none; background: var(--paper); border: 1px solid var(--line); padding: 0.15rem 0.5rem; }
+    .table-wrap { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; }
+    caption { text-align: left; padding: 0.45rem 0.65rem 0; font-weight: 500; }
+    th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.65rem; border-top: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 500; }
+    .jump { color: var(--muted); font-size: 0.92rem; }
+    .pager {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.6rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid var(--line);
+    }
+    #empty { display: none; padding: 1rem 0; }
+    @media (max-width: 800px) {
+      :root { --header: 8.4rem; }
+      .top-row, .search input { width: 100%; }
+      .top-row { flex-direction: column; align-items: stretch; }
+      .layout { grid-template-columns: 1fr; }
+      .toc {
+        position: static;
+        max-height: none;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        padding: 0.35rem 0.6rem 0.55rem;
+      }
+      .toc summary { display: list-item; cursor: pointer; font-weight: 500; padding: 0.25rem 0; }
+      .compare, .compare.three { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+    @media print {
+      .top, .toc, .pager, .jump { display: none; }
+      .layout { display: block; padding: 0; }
+      body { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#content">본문으로</a>
+  <header class="top">
+    <div class="top-row">
+      <div>
+        <p class="brand">history study</p>
+        <h1>조선 시대 노트</h1>
+      </div>
+      <form class="search" role="search">
+        <label for="q">노트 찾기</label>
+        <input id="q" name="q" type="search" placeholder="예: 대동법" autocomplete="off">
+      </form>
+    </div>
+    <nav class="timeline" aria-label="시기">
+      <a href="#founding">건국</a>
+      <a href="#kings">태종–성종</a>
+      <a href="#sahwa">사화</a>
+      <a href="#bungdang-form">붕당</a>
+      <a class="mark" href="#divide">임진 1592</a>
+      <a href="#horan-war">호란</a>
+      <a href="#yeongjo">탕평</a>
+      <a href="#sedo">세도</a>
+      <a href="#samjeong">삼정</a>
+      <a href="#silhak">실학</a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <details class="toc" open>
+      <summary>목차</summary>
+      <nav aria-label="목차">
+        <p class="group">조선 전기</p>
+        <a href="#ch-rule">통치 체제와 대외 관계</a>
+        <a href="#ch-sarim">사림, 문화, 사회</a>
+        <p class="group">전환</p>
+        <a href="#ch-imjin">임진왜란</a>
+        <a href="#ch-horan">호란</a>
+        <p class="group">조선 후기</p>
+        <a href="#ch-politics">조선 후기 정치</a>
+        <a href="#ch-society">사회의 변동</a>
+        <p class="group">이어 보기</p>
+        <a class="jump" href="#bungdang-form">붕당</a>
+        <a class="jump" href="#tax">세금</a>
+        <a class="jump" href="#foreign">외교</a>
+        <a class="jump" href="#seowon">서원</a>
+        <a class="jump" href="#codes">법전</a>
+      </nav>
+    </details>
+
+    <main id="content">
+      <p id="empty">맞는 단원이 없습니다.</p>
+
+      <article class="chapter" id="ch-rule" data-era="early">
+        <p class="kicker">조선 전기</p>
+        <h2>통치 체제와 대외 관계</h2>
+
+        <section class="block" id="founding">
+          <h3>조선의 건국</h3>
+          <h4>배경 · 위화도 회군, 1388</h4>
+          <ol>
+            <li>명의 철령 이북 당 반환요구</li>
+            <li>우왕 + 최영 : 요동 정벌 추진</li>
+            <li>이성계의 쿠테타</li>
+            <li>우와 폐위, 최정 제거</li>
+            <li>신흥 무인세력 + 신진 사대부 : 정치적 군사적 실권 장악</li>
+          </ol>
+          <div class="compare">
+            <section>
+              <h4>이성계의 4불가론</h4>
+              <ul>
+                <li>소국이 대국을 치면 안됨</li>
+                <li>여름철 군사를 동원해서 안됨</li>
+                <li>장마철이라 전염병 위험, 활의 위력 감소</li>
+                <li>외구의 침입</li>
+              </ul>
+            </section>
+            <section>
+              <h4>최영의 주장</h4>
+              <ul>
+                <li>명이 강하지만, 원이 멸망하지 않음</li>
+                <li>공민왕때 요동 공격하여 차지함, 이번에도 가능</li>
+                <li>빨리 끝나면, 가을에 군랑 확보 가능</li>
+                <li>장마철 힘든 싸움은 명나라도 동일</li>
+              </ul>
+            </section>
+          </div>
+          <h4>과정</h4>
+          <ul>
+            <li>과전법 : 권문세족의 대농장 혁파, 토지 재분배</li>
+          </ul>
+          <div class="compare">
+            <section>
+              <h4>온건파 (정몽주)</h4>
+              <p>고려 유지 / 천천히 개혁</p>
+            </section>
+            <section>
+              <h4>급진파 (정도전)</h4>
+              <p>고려 멸망 / 급한 개혁</p>
+            </section>
+          </div>
+          <p class="path">온거파 제거 → 조선 건국 → 한양 천도</p>
+          <p>유교 기반의 국가 기틀</p>
+        </section>
+
+        <section class="block" id="kings">
+          <h3>왕대의 기틀</h3>
+          <div class="table-wrap">
+            <table>
+              <caption>태종부터 성종</caption>
+              <thead><tr><th>왕</th><th>내용</th></tr></thead>
+              <tbody>
+                <tr><th>태종</th><td>중앙집권체제, 사병 페지, 6조 직계제(의정부 x), 호패법 (세금징수, 군역부과)</td></tr>
+                <tr><th>세종</th><td>집헌전, 경연, 훈민정음, 농사직설, 과학기술 (측우기, 해시계, 물시계등), 압록강 유역 4군 (최윤덕), 두만강 유역 6진 (김종서) 개척, 쓰시마섬 정벌, 의정부 서사제</td></tr>
+                <tr><th>세조</th><td>집헌전 폐지, 경연 폐지, 6조 직계제</td></tr>
+                <tr id="codes"><th>성종</th><td>홍문관설치, 경연, 경국대전(중앙/지방의 통치제도 마련)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="jump">이어 보기 <a href="#yeongjo">속대전</a> · <a href="#jeongjo">대전통편</a></p>
+        </section>
+
+        <section class="block" id="offices">
+          <h3>통치체제</h3>
+          <dl class="defs">
+            <div><dt>왕</dt><dd></dd></div>
+            <div><dt>의정부</dt><dd>정책</dd></div>
+            <div><dt>승정원</dt><dd>왕명 전달</dd></div>
+            <div><dt>의금부</dt><dd>재판, 사법</dd></div>
+            <div><dt>사헌부</dt><dd>3사 · 관리, 감찰</dd></div>
+            <div><dt>사간원</dt><dd>3사 · 간언, 비판</dd></div>
+            <div><dt>홍문관</dt><dd>3사 · 조언, 고문</dd></div>
+            <div><dt>춘추관</dt><dd>역사책 편찬</dd></div>
+            <div><dt>성균관</dt><dd>교육 기관</dd></div>
+            <div><dt>한성부</dt><dd>수도 경비</dd></div>
+          </dl>
+          <p class="note">3사 : 권력 독점 방지 / 언론기관</p>
+          <p>의정부 산하 6조</p>
+          <ul class="chips">
+            <li>이조</li><li>호조</li><li>예조</li><li>병조</li><li>형조</li><li>공조</li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h3>지방 행정 조직</h3>
+          <ul>
+            <li>8도 : 관찰사 파견 — 수령 관리, 감독</li>
+            <li>부, 목, 군, 현 : 수령 파견 — 행정 + 사법 + 군사</li>
+            <li>향리 : 수령 보좌, 행정 실무 처리</li>
+            <li>유향소 : 지방 양반들의 향촌 자치 기구 — 수령 보좌, 향리 감찰, 지방민 교화</li>
+          </ul>
+          <p class="note">유향소(수령을 보좌, 향리를 감시), 향리(수령을 보좌)</p>
+        </section>
+
+        <section class="block">
+          <h3>군사, 교통, 통신제도</h3>
+          <dl class="defs">
+            <div><dt>군사</dt><dd>군역 (16세 이상, 60세 이하 양인 남성)</dd></div>
+            <div><dt>교통</dt><dd>역참 (물자수송과 통신)</dd></div>
+            <div><dt>통신</dt><dd>봉수 (국경 지대의 위급 사항 전달)</dd></div>
+          </dl>
+        </section>
+
+        <section class="block">
+          <h3>교육, 관리 등용</h3>
+          <p>유교적 교양과 능력의 관리 양성</p>
+          <p class="path">초등 서당 → 중등 4북학당(한양), 향교(지방) → 고등 성균관</p>
+          <p class="note">성균관 입학은 과거 1차 = 소과</p>
+          <p>과거 제도 : 양인 이상 응시 가능 (3년주기)</p>
+          <div class="table-wrap">
+            <table>
+              <caption>과거</caption>
+              <thead><tr><th>종류</th><th>응시</th><th>경로·특징</th></tr></thead>
+              <tbody>
+                <tr><th>문과</th><td>양반 자제</td><td>소과 → 대과</td></tr>
+                <tr><th>무과</th><td>양반, 향기, 상민의 자제</td><td>고려시대와 차이점</td></tr>
+                <tr><th>잡과</th><td>중인</td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="block" id="foreign">
+          <h3>대외 관계 · 사대 교린</h3>
+          <ul>
+            <li>태종때 명과 친선관계 — 조공무역</li>
+            <li>교린 (여진, 일본) : 평화시대 — 교역 허락, 비평화 — 강경히 대응함</li>
+          </ul>
+          <p class="jump">이어 보기 <a href="#ch-imjin">임진왜란</a> · <a href="#gwanghae">광해군의 중립외교</a> · <a href="#ch-horan">호란</a></p>
+        </section>
+
+        <nav class="pager" aria-label="앞뒤 단원">
+          <span></span>
+          <a href="#ch-sarim">다음 · 사림, 문화, 사회</a>
+        </nav>
+      </article>
+
+      <article class="chapter" id="ch-sarim" data-era="early">
+        <p class="kicker">조선 전기</p>
+        <h2>사림, 문화, 사회</h2>
+
+        <section class="block">
+          <h3>사림과 훈구</h3>
+          <div class="compare">
+            <section>
+              <h4>훈구</h4>
+              <ul>
+                <li>세조 집권에 도움</li>
+                <li>고위 관직</li>
+                <li>많은 토지와 노비</li>
+                <li>왕실과 혼인 → 권력 강화</li>
+                <li>세조 집권후 권력 독점</li>
+              </ul>
+            </section>
+            <section>
+              <h4>사림</h4>
+              <ul>
+                <li>온건파 사대부 후손</li>
+                <li>지방에서 성리학 연구/공부, 제자 양성</li>
+                <li>향촌 자치, 완도 정치 추구</li>
+                <li>왕권과 신권의 조화 강조</li>
+                <li>성종떄 등용 : 3사에 배치 → 훈구 비판</li>
+              </ul>
+            </section>
+          </div>
+        </section>
+
+        <section class="block" id="sahwa">
+          <h3>사화 · 훈구 vs 사림</h3>
+          <div class="table-wrap">
+            <table>
+              <caption>4대 사화</caption>
+              <thead><tr><th>시기</th><th>사화</th><th>내용</th></tr></thead>
+              <tbody>
+                <tr><th>연산군</th><td>무오 사화</td><td>김종직의 조의제문</td></tr>
+                <tr><th>연산군</th><td>갑자 사화</td><td>폐비 윤씨 사건</td></tr>
+                <tr><th colspan="3">중종 반정 : 연산군 폐위 → 중종 즉위</th></tr>
+                <tr><th>중종</th><td>기묘 사화</td><td>조광조의 개혁 정치에 대한 반발, 왕도 정치 실현, 현량과 실시, 위훈 삭제</td></tr>
+                <tr><th>명종</th><td>을사 사화</td><td>외척 간 대립 문제</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">무 - 갑 - 기 - 을 : 사화 발생 (선생님이 안내함)</p>
+          <h4>흐름</h4>
+          <p class="path">신진사대부 → 급진파 → 조선 건국 참여 → 훈구 → 사화</p>
+          <p class="path">신진사대부 → 온건파 → 조선 건국 반대 → 사림 → 사화 → 사림의 집권 → 붕당정치</p>
+        </section>
+
+        <section class="block" id="seowon">
+          <h3>사림의 성장</h3>
+          <h4>서원</h4>
+          <p>선대 유학자 제사 + 지방 양반 자제 교육</p>
+          <ul>
+            <li>지방 정치 여론 형성</li>
+            <li>제자 양성을 통한 학파 형성. 붕당정치의 형성 요인</li>
+          </ul>
+          <h4>향약</h4>
+          <p class="path">향촌 자치 규약 → 지방민 교화/통제 → 향촌 사회 주도</p>
+          <p class="jump">이어 보기 <a href="#yeongjo">영조의 서원 정리</a></p>
+        </section>
+
+        <section class="block" id="bungdang-form">
+          <h3>붕당의 형성 · 인식의 차이</h3>
+          <ul>
+            <li>성격 : 정치적, 학문적 / 상호 경제, 존중</li>
+            <li>형성 계기 : 이조전랑 (인사담당, 후임 천거) 의 임명 문제</li>
+          </ul>
+          <p>선조때</p>
+          <p class="path">사림 → 서인 (이이) / 동인 (이황) / 남인, 북인</p>
+          <p class="jump">이어 보기 <a href="#bungdang-late">후기 붕당의 전개</a></p>
+        </section>
+
+        <section class="block">
+          <h3>문화와 사회</h3>
+          <ul>
+            <li>문화 : 유교 윤리 보급</li>
+            <li>문화 : 경국대전, 조선왕조실록, 농사직설등 편찬</li>
+          </ul>
+          <div class="table-wrap">
+            <table>
+              <caption>신분</caption>
+              <thead><tr><th>신분</th><th>내용</th></tr></thead>
+              <tbody>
+                <tr><th>양반</th><td>과거를 통한 관직, 국역 면제</td></tr>
+                <tr><th>중인</th><td>기술관, 향리</td></tr>
+                <tr><th>상민</th><td>농민, 국역 의무</td></tr>
+                <tr><th>천인</th><td>노비</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <nav class="pager" aria-label="앞뒤 단원">
+          <a href="#ch-rule">이전 · 통치 체제와 대외 관계</a>
+          <a href="#ch-imjin">다음 · 임진왜란</a>
+        </nav>
+      </article>
+
+      <article class="chapter" id="ch-imjin" data-era="mid">
+        <p class="kicker">조선전기 - 후기의 전환</p>
+        <h2>임진왜란</h2>
+
+        <section class="block">
+          <h3>전쟁 전 상황</h3>
+          <ul>
+            <li>조선 : 평화 → 군사력 약화</li>
+            <li>왜 : 도요토미히데요시의 전국시대 통일, 조총의 보급</li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h3>임진왜란</h3>
+          <p>발발 : 일본의 침략</p>
+          <ol>
+            <li>부산진, 동래성 함락</li>
+            <li>충주성 전투 패배</li>
+            <li>한양 함락</li>
+            <li>선조 : 의주로 피난, 명에게 지원 요청</li>
+          </ol>
+          <h4>수군 · 이순신</h4>
+          <p>옥포, 사천, 한산도(대첩, 학익진)등 승리</p>
+          <p>수군 활약의 의의</p>
+          <ol>
+            <li>일본군, 무기 보급 차단</li>
+            <li>전라도 평야 지대 방어</li>
+          </ol>
+          <h4>의병</h4>
+          <p>지방민들로 결성 (유생, 승려등 주도), 익숙한 지리를 활용한 전술</p>
+          <h4>조+명 연합군</h4>
+          <p>명의 지원군 + 조선 관군 → 평양성 탈환, 행주산성(권율장군) 승리</p>
+          <p>휴전 (3년)</p>
+          <h4>정유재란</h4>
+          <p>이순신 : 명량대첩, 노량해전 → 일본군 격퇴 / 전쟁종결</p>
+          <h4>결과와 영향</h4>
+          <div class="compare three">
+            <section>
+              <h4>조선</h4>
+              <ul>
+                <li>국가 재정 위기</li>
+                <li>신분재 동요</li>
+                <li>문화재 피해</li>
+              </ul>
+            </section>
+            <section>
+              <h4>일본</h4>
+              <ul>
+                <li>정권 교체(도쿠가와 이예야스) → 에도 막부시대</li>
+                <li>문화 발전 (도자기, 성리학)</li>
+              </ul>
+            </section>
+            <section>
+              <h4>중국</h4>
+              <ul>
+                <li>명 쇠퇴</li>
+                <li>여진 성장(후금 건국)</li>
+              </ul>
+            </section>
+          </div>
+        </section>
+
+        <section class="block" id="divide">
+          <h3>전기와 후기 · 임진왜란 기준 1592</h3>
+          <div class="table-wrap">
+            <table>
+              <caption>전기와 후기</caption>
+              <thead><tr><th>전기</th><th>후기</th></tr></thead>
+              <tbody>
+                <tr><td>경국대전 : 국가 기틀</td><td></td></tr>
+                <tr><td>사화</td><td>호란</td></tr>
+                <tr><td>붕당</td><td>붕당정치 변질, 문화 변화</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="block" id="gwanghae">
+          <h3>광해군의 전후 복구 정책</h3>
+          <div class="compare">
+            <section>
+              <h4>국내 · 전후 복구 정책</h4>
+              <ul>
+                <li>토지 대장, 호적 정리</li>
+                <li>황무지 개간</li>
+                <li>성곽, 무리 등 수리</li>
+                <li>동의보감 (허준) 편찬</li>
+              </ul>
+            </section>
+            <section>
+              <h4>대외 · 중립외교 with 북인</h4>
+              <p>배경 — 후금 건국 → 후금의 명 압박 → 명이 조선에게 지원군 요청</p>
+              <p>내용 — 명에 군대 파견후 강홍립에게 상황에 따른 대처 → 후금과의 충돌 회피</p>
+              <p>명분과 의리를 중시하는 서인의 비판</p>
+            </section>
+          </div>
+          <p class="jump">이어 보기 <a href="#ch-horan">인조반정과 호란</a></p>
+        </section>
+
+        <nav class="pager" aria-label="앞뒤 단원">
+          <a href="#ch-sarim">이전 · 사림, 문화, 사회</a>
+          <a href="#ch-horan">다음 · 호란</a>
+        </nav>
+      </article>
+
+      <article class="chapter" id="ch-horan" data-era="mid">
+        <p class="kicker">조선전기 - 후기의 전환</p>
+        <h2>호란</h2>
+
+        <section class="block">
+          <h3>인조반정</h3>
+          <p>서인의 광해군 페위 → 인조 즉위</p>
+        </section>
+
+        <section class="block" id="horan-war">
+          <h3>호란 발발</h3>
+          <p>친명 배금 정책 : 명과의 의리떄문에 후금을 배척하는 외교</p>
+          <ol>
+            <li>정묘호란 → 후금과 형제관계</li>
+            <li>병자호란 (인조의 삼전도 항복) → 강화조약</li>
+          </ol>
+          <p class="path">청의 군신관께 거절 → 청의 한양 점령 → 남한산성에서 항거</p>
+          <div class="compare">
+            <section>
+              <h4>척화파 (주전파)</h4>
+              <p>후금요구 거절, 청과 싸움</p>
+            </section>
+            <section>
+              <h4>주화파</h4>
+              <p>후금의 요구 수용, 청과 화해</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="block" id="bukbeol">
+          <h3>북벌</h3>
+          <p>북벌대두 → 실패(효종 사)</p>
+          <ul>
+            <li>의미 — 청을 정벌 / 효종 대, 송시열 등 주장</li>
+            <li>내용 — 성곽수리, 무기 확보, 군대 양성</li>
+            <li>결과 — 북학의 등장. 후대 : 실학 → 개화에 영향. 청과의 교류 / 문물 수용 주장</li>
+          </ul>
+          <p class="jump">이어 보기 <a href="#silhak">실학 · 중상학파</a></p>
+        </section>
+
+        <nav class="pager" aria-label="앞뒤 단원">
+          <a href="#ch-imjin">이전 · 임진왜란</a>
+          <a href="#ch-politics">다음 · 조선 후기 정치</a>
+        </nav>
+      </article>
+
+      <article class="chapter" id="ch-politics" data-era="late">
+        <p class="kicker">조선 후기</p>
+        <h2>조선 후기 정치</h2>
+
+        <section class="block">
+          <h3>통치 제도의 변화</h3>
+          <ul>
+            <li>정치 : 비변사 기능 강화 (임시기구 → 상설기구)</li>
+            <li>군사 : 훈련도감 설치 (직업군인 : 포수, 살수, 사수)</li>
+          </ul>
+          <div class="table-wrap" id="tax">
+            <table>
+              <caption>세금</caption>
+              <thead><tr><th>항목</th><th>제도</th><th>변화</th></tr></thead>
+              <tbody>
+                <tr><th>전세</th><td>영정법</td><td>비옥도, 풍흉 → 토지크기</td></tr>
+                <tr><th>공납</th><td>대동법</td><td>특산물 → 쌀(도지크기), 동전, 배</td></tr>
+                <tr><th>군역</th><td>군역법</td><td>군포 2필 → 1필</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">세금 부담 축소</p>
+          <p class="jump">이어 보기 <a href="#samjeong">삼정의 문란</a></p>
+        </section>
+
+        <section class="block" id="bungdang-late">
+          <h3>붕당 정치의 전개 / 변질</h3>
+          <div class="table-wrap">
+            <table>
+              <caption>왕대별 붕당</caption>
+              <thead><tr><th>왕</th><th>구도</th></tr></thead>
+              <tbody>
+                <tr><th>선조</th><td>동인 — 서인(주)</td></tr>
+                <tr><th>광해군</th><td>북인(주) — 남인 — 서인</td></tr>
+                <tr><th>인조</th><td>북인(X) — 남인 — 서인(주)</td></tr>
+                <tr><th>현종</th><td>예송(상복 입는 기간) 농쟁 — 남인의 집권</td></tr>
+                <tr><th>숙종</th><td>환국 : 급격한 정치적 변동으로 지배층 교체</td></tr>
+                <tr><th>경종</th><td>소론(주) — 노론</td></tr>
+                <tr><th>영조</th><td>소론 — 노론(주)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h4>현종 · 예송</h4>
+          <div class="table-wrap">
+            <table>
+              <caption>예송</caption>
+              <thead><tr><th></th><th>서인</th><th>남인</th><th>결과</th></tr></thead>
+              <tbody>
+                <tr><th>1차</th><td>1년 주장</td><td>3년 주장</td><td>서인의 승리</td></tr>
+                <tr><th>2차</th><td>9개월 주장</td><td>1년 주장</td><td>남인의 승리</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h4>숙종 · 환국</h4>
+          <p class="path">서인(주) → 남인(주) → 서인(주) → 서인의 분열 : 노론 / 소론</p>
+          <ul>
+            <li>숙종전 : 상대 붕당의 존재 인정 (균형)</li>
+            <li>숙중후 : 상대 붕당 존재 부정</li>
+            <li>경종후 : 일당 전제화</li>
+          </ul>
+        </section>
+
+        <section class="block" id="yeongjo">
+          <h3>후기의 정치 변동</h3>
+          <h4>영조 · 개혁 정치</h4>
+          <p>탕평책</p>
+          <ul>
+            <li>이조전랑의 권한 축소</li>
+            <li>서원 정리, 탕평비 건립, 속대전</li>
+          </ul>
+          <p>경제 — 균역법 실시</p>
+          <p>사회 — 가혹한 형벌 금지, 청계천 정비</p>
+
+          <h4 id="jeongjo">정조 · 개혁 정책</h4>
+          <p>탕평책 — 소론과 남인 적극 등용 (개혁적 성향)</p>
+          <p>왕권 강화</p>
+          <ul>
+            <li>규장각 설립 : 개혁 인재 양성</li>
+            <li>장용영 설치 : 왕실 호위 부대</li>
+            <li>수원화성 건설 : 계획도시 건설</li>
+          </ul>
+          <p>경제 — 자유로운 상업 활동 보장</p>
+          <p>사회</p>
+          <ul>
+            <li>서얼 차별 완화, 대전통편</li>
+            <li>노비 처지 개선</li>
+          </ul>
+        </section>
+
+        <section class="block" id="sedo">
+          <h3>세도정치의 전개</h3>
+          <p>순조 — 헌종 — 철종, 3대 60년</p>
+          <p>전개 : 외척 가문의 권력 장악</p>
+          <ul>
+            <li>비젼사의 주요 관직 독점</li>
+            <li>과거시험 부정, 탐관 오리등 부정 부패, 매관매직</li>
+          </ul>
+          <p>결과</p>
+          <ul>
+            <li>왕권 약화 / 의정부, 6조의 약화</li>
+            <li>국가 재정 악화 → 삼정의 문란</li>
+          </ul>
+          <p class="jump">이어 보기 <a href="#samjeong">삼정의 문란</a></p>
+        </section>
+
+        <nav class="pager" aria-label="앞뒤 단원">
+          <a href="#ch-horan">이전 · 호란</a>
+          <a href="#ch-society">다음 · 사회의 변동</a>
+        </nav>
+      </article>
+
+      <article class="chapter" id="ch-society" data-era="late">
+        <p class="kicker">조선 후기</p>
+        <h2>사회의 변동</h2>
+
+        <section class="block" id="samjeong">
+          <h3>삼정의 문란</h3>
+          <div class="table-wrap">
+            <table>
+              <caption>삼정</caption>
+              <thead><tr><th>항목</th><th>내용</th></tr></thead>
+              <tbody>
+                <tr><th>전세 (전정)</th><td>각종 잡세 추가</td></tr>
+                <tr><th>군포 (군정)</th><td>가난한 양인. 인징(이웃), 족징(친척), 백골징포(고인), 황구첨정(어린아이)</td></tr>
+                <tr><th>환곡 (환정)</th><td>의의 — 곡실 대출. 변질 — 고리대화(지방 관청의 재정 마련 수단으로 변질)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h4>농민봉기</h4>
+          <p>홍경래의 난 / 임술 농민 봉기 → 삼정이정청 : 삼정의 문란 시정을 위해 → 실패</p>
+        </section>
+
+        <section class="block">
+          <h3>새로운 사상의 등장</h3>
+          <div class="compare three">
+            <section>
+              <h4>1. 예언사상</h4>
+              <p>정감록, 미륵신앙, 무속신앙</p>
+            </section>
+            <section>
+              <h4>2. 천주교 (서학)</h4>
+              <p>최초 : 서학(학문으로 수용) → 평등사상, 내세 사상</p>
+              <p>탄압 : 제사 거부 등으로 정부가 탄압함</p>
+            </section>
+            <section>
+              <h4>3. 동학</h4>
+              <ul>
+                <li>최제우가 창시</li>
+                <li>인즉천(인내천) : 평등사상</li>
+                <li>혹세무민을 이유로 탄압</li>
+              </ul>
+            </section>
+          </div>
+        </section>
+
+        <section class="block" id="silhak">
+          <h3>학문의 발전</h3>
+          <p>실학 : 양난 이후 급격한 사회/경제적 변화 → 개혁 필요, 성리학 비판 : 남인으로 구정</p>
+          <div class="compare">
+            <section>
+              <h4>중농학파</h4>
+              <p>토지제도 개혁 주장 : 농촌 사회 안정 추구</p>
+              <ul>
+                <li>유형원 : 농민 균등 분배, 관직 차등</li>
+                <li>정약용 : 공동소유 노동력에 따른 분배</li>
+              </ul>
+            </section>
+            <section>
+              <h4>중상학파</h4>
+              <p>상공업 발전, 청의 문물 수용 주장</p>
+              <ul>
+                <li>박제가 : 소비 권장</li>
+                <li>박지원 : 양반 사회 풍자</li>
+                <li>홍대용 : 중국 중심 세계관 비판</li>
+              </ul>
+            </section>
+          </div>
+          <h4>국학</h4>
+          <p>우리의 역사 / 지리</p>
+          <ul>
+            <li>역사 : 안정복 동사강목, 유득공 발해고</li>
+            <li>지리 : 이중환 택리지, 김정호 대동여지도</li>
+          </ul>
+        </section>
+
+        <nav class="pager" aria-label="앞뒤 단원">
+          <a href="#ch-politics">이전 · 조선 후기 정치</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+  </div>
+
+  <script>
+    const form = document.querySelector(".search");
+    const input = document.querySelector("#q");
+    const empty = document.querySelector("#empty");
+    const chapters = [...document.querySelectorAll("article.chapter")];
+
+    function apply(query) {
+      const q = query.trim();
+      let shown = 0;
+      chapters.forEach((chapter) => {
+        const blocks = [...chapter.querySelectorAll(".block")];
+        const title = chapter.querySelector("h2").textContent;
+        const titleHit = q && title.includes(q);
+        let any = false;
+        blocks.forEach((block) => {
+          const hit = !q || titleHit || block.textContent.includes(q);
+          block.hidden = !hit;
+          if (hit) any = true;
+        });
+        chapter.hidden = !any;
+        if (any) shown += 1;
+      });
+      empty.style.display = shown ? "none" : "block";
+    }
+
+    const initial = new URLSearchParams(location.search).get("q");
+    if (initial) {
+      input.value = initial;
+      apply(initial);
+    }
+    input.addEventListener("input", () => apply(input.value));
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const url = new URL(location.href);
+      if (input.value.trim()) url.searchParams.set("q", input.value.trim());
+      else url.searchParams.delete("q");
+      history.replaceState(null, "", url);
+      apply(input.value);
+    });
+
+    const links = [...document.querySelectorAll(".toc a")];
+    const byId = new Map(links.map((link) => [link.getAttribute("href").slice(1), link]));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        links.forEach((link) => link.removeAttribute("aria-current"));
+        const link = byId.get(entry.target.id);
+        if (link) link.setAttribute("aria-current", "page");
+      });
+    }, { rootMargin: "-30% 0px -60% 0px", threshold: 0 });
+    chapters.forEach((chapter) => observer.observe(chapter));
+
+    document.querySelectorAll(".toc a").forEach((link) => {
+      link.addEventListener("click", () => {
+        if (window.matchMedia("(max-width: 800px)").matches) {
+          document.querySelector(".toc").open = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
