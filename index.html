@@ -439,6 +439,7 @@
       border-top: 1px solid var(--line);
     }
     #empty { display: none; padding: 1rem 0; }
+    .phone-lead, .phone-guide { display: none; }
     @media (max-width: 800px) {
       :root { --header: 8.4rem; }
       .top-row, .tools, .search, .search input { width: 100%; }
@@ -455,6 +456,62 @@
       .fork-arms { flex-direction: column; margin-top: 0.6rem; padding-left: 0.8rem; border-left: 2px solid var(--ink); }
       .fork-arms::before, .fork-arms::after, .fork-arms > section::before { display: none; }
       .split { grid-template-columns: 1fr; gap: 0.7rem; }
+    }
+    @media (max-width: 700px) {
+      :root { --header: 8.8rem; }
+      body { padding-bottom: calc(3.5rem + env(safe-area-inset-bottom)); }
+      .brand { display: none; }
+      .top { padding: 0.5rem 0.85rem 0.15rem; }
+      .top-row, .tools { flex-direction: column; align-items: stretch; width: 100%; }
+      .tools { flex-direction: row; align-items: center; }
+      h1 { font-size: 1.25rem; }
+      .search { flex: 1; width: auto; }
+      .search label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+      .search input { width: 100%; }
+      .layout { grid-template-columns: 1fr; gap: 0.4rem; padding: 0.7rem 0.8rem 1.4rem; }
+      .phone-lead { display: block; margin: 0.2rem 0 0.7rem; color: var(--muted); font-size: 0.92rem; }
+      .toc {
+        border: 0;
+        padding: 0;
+        background: transparent;
+      }
+      .toc summary { display: none; }
+      .toc a {
+        margin-top: 0.4rem;
+        padding: 0.85rem 0.9rem;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-left-width: 3px;
+      }
+      .toc a[data-era="early"] { border-left-color: var(--early); }
+      .toc a[data-era="mid"] { border-left-color: var(--mid); }
+      .toc a[data-era="late"] { border-left-color: var(--late); }
+      .layout:has(details.chapter[open]) .toc { display: none; }
+      .chapter:not([open]) { display: none; }
+      .chapter { margin-bottom: 0.8rem; }
+      .block > summary { padding: 0.45rem 0; }
+      table.fit { width: 100%; }
+      .phone-guide {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr 1fr;
+        gap: 0.4rem;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 6;
+        padding: 0.45rem 0.7rem calc(0.45rem + env(safe-area-inset-bottom));
+        background: var(--bg);
+        border-top: 1px solid var(--line);
+      }
+      .phone-guide button {
+        font: inherit;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 0.55rem 0.4rem;
+      }
+      .phone-guide button:disabled { color: var(--muted); }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -502,15 +559,16 @@
     <details class="toc" open>
       <summary>목차</summary>
       <nav aria-label="목차">
+        <p class="phone-lead">단원을 고르면 그 단원만 펼쳐집니다. 소제목을 눌러 내용을 보세요.</p>
         <p class="group">조선 전기</p>
-        <a href="#ch-rule">통치 체제와 대외 관계</a>
-        <a href="#ch-sarim">사림, 문화, 사회</a>
+        <a href="#ch-rule" data-era="early">통치 체제와 대외 관계</a>
+        <a href="#ch-sarim" data-era="early">사림, 문화, 사회</a>
         <p class="group">전환</p>
-        <a href="#ch-imjin">임진왜란</a>
-        <a href="#ch-horan">호란</a>
+        <a href="#ch-imjin" data-era="mid">임진왜란</a>
+        <a href="#ch-horan" data-era="mid">호란</a>
         <p class="group">조선 후기</p>
-        <a href="#ch-politics">조선 후기 정치</a>
-        <a href="#ch-society">사회의 변동</a>
+        <a href="#ch-politics" data-era="late">조선 후기 정치</a>
+        <a href="#ch-society" data-era="late">사회의 변동</a>
         <p class="group">이어 보기</p>
         <a class="jump" href="#bungdang-form">붕당</a>
         <a class="jump" href="#tax">세금</a>
@@ -1182,6 +1240,12 @@
     </main>
   </div>
 
+  <nav class="phone-guide" aria-label="단원 이동">
+    <button type="button" id="phone-prev">이전</button>
+    <button type="button" id="phone-index">단원</button>
+    <button type="button" id="phone-next">다음</button>
+  </nav>
+
   <script>
     const form = document.querySelector(".search");
     const input = document.querySelector("#q");
@@ -1245,15 +1309,97 @@
         node = node.parentElement;
       }
     }
+    const phoneQuery = window.matchMedia("(max-width: 700px)");
+    const toc = document.querySelector(".toc");
+    const phonePrev = document.querySelector("#phone-prev");
+    const phoneNext = document.querySelector("#phone-next");
+    const phoneIndex = document.querySelector("#phone-index");
+
+    function closeReading() {
+      chapters.forEach((chapter) => {
+        chapter.open = false;
+        chapter.querySelectorAll("details.block").forEach((block) => { block.open = false; });
+      });
+    }
+
+    function showChapter(chapter) {
+      if (input.value.trim()) {
+        input.value = "";
+        apply("");
+      }
+      closeReading();
+      chapter.open = true;
+      toc.open = true;
+      chapter.scrollIntoView({ block: "start" });
+      paintGuide();
+    }
+
+    function paintGuide() {
+      const index = chapters.findIndex((chapter) => chapter.open);
+      phonePrev.disabled = index < 0;
+      phoneNext.disabled = index === chapters.length - 1;
+    }
+
+    function enterPhone() {
+      if (input.value.trim()) {
+        paintGuide();
+        return;
+      }
+      closeReading();
+      toc.open = true;
+      if (location.hash) openTarget(location.hash.slice(1));
+      paintGuide();
+    }
+
+    function leavePhone() {
+      chapters.forEach((chapter) => {
+        chapter.open = true;
+        chapter.querySelectorAll("details.block").forEach((block) => { block.open = true; });
+      });
+      toc.open = true;
+    }
+
+    phonePrev.addEventListener("click", () => {
+      const index = chapters.findIndex((chapter) => chapter.open);
+      if (index === 0) {
+        closeReading();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        paintGuide();
+      } else if (index > 0) showChapter(chapters[index - 1]);
+    });
+    phoneNext.addEventListener("click", () => {
+      const index = chapters.findIndex((chapter) => chapter.open);
+      if (index < 0) showChapter(chapters[0]);
+      else if (index < chapters.length - 1) showChapter(chapters[index + 1]);
+    });
+    phoneIndex.addEventListener("click", () => {
+      if (input.value.trim()) {
+        input.value = "";
+        apply("");
+      }
+      closeReading();
+      toc.open = true;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      paintGuide();
+    });
+
     document.querySelectorAll("a[href^='#']").forEach((link) => {
       link.addEventListener("click", () => {
-        openTarget(link.getAttribute("href").slice(1));
-        if (window.matchMedia("(max-width: 800px)").matches && link.closest(".toc")) {
-          document.querySelector(".toc").open = false;
-        }
+        const id = link.getAttribute("href").slice(1);
+        openTarget(id);
+        if (!phoneQuery.matches) return;
+        const target = document.getElementById(id);
+        const chapter = target && (target.matches("details.chapter") ? target : target.closest("details.chapter"));
+        if (chapter) chapters.forEach((item) => { if (item !== chapter) item.open = false; });
+        paintGuide();
       });
     });
     if (location.hash) openTarget(location.hash.slice(1));
+    if (phoneQuery.matches) enterPhone();
+    phoneQuery.addEventListener("change", (event) => {
+      if (event.matches) enterPhone();
+      else leavePhone();
+    });
 
     const themeBtn = document.querySelector("#theme");
     function paintTheme(theme) {
