@@ -330,97 +330,29 @@
     }
     .lane-card h4 { margin: 0 0 0.35rem; }
     .lane-card ul { margin-bottom: 0; }
-    .reigns { display: flex; flex-direction: column; gap: 0.7rem; margin: 0.5rem 0 1rem; }
-    .reign {
-      display: grid;
-      grid-template-columns: 4.8rem minmax(0, 1fr);
-      gap: 0.8rem;
-      align-items: center;
-    }
-    .who { font-weight: 500; }
-    .sides { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-    .sides span, .round span, .branch-step span {
+    .legend { color: var(--muted); font-size: 0.92rem; }
+    table.fit { width: max-content; max-width: 100%; }
+    .faction td { color: var(--ink); }
+    .faction .name {
+      display: inline-block;
+      margin: 0.08rem 0.2rem 0.08rem 0;
       border: 1px solid var(--line);
       color: var(--muted);
-      background: transparent;
-      padding: 0.38rem 0.75rem;
+      padding: 0.05rem 0.4rem;
     }
-    .reigns .lead {
+    .faction .lead {
       background: var(--era);
       color: var(--bg);
       border-color: var(--era);
       font-weight: 500;
-      padding: 0.55rem 1rem;
     }
-    html[data-theme="dark"] .reigns .lead {
+    html[data-theme="dark"] .faction .lead {
       background: color-mix(in srgb, var(--era) 24%, var(--paper));
       color: var(--ink);
       border-color: color-mix(in srgb, var(--era) 46%, var(--line));
     }
-    .sides .gone { text-decoration: line-through; }
-    .legend { color: var(--muted); font-size: 0.92rem; }
-    .shift { justify-content: center; }
-    .shift .lead { position: relative; margin-right: 1.15rem; }
-    .shift .lead:nth-child(-n+2)::after {
-      content: "→";
-      position: absolute;
-      left: calc(100% + 0.28rem);
-      top: 0.45rem;
-      color: var(--muted);
-      font-weight: 400;
-    }
-    .event-line { margin: 0 0 0.45rem; }
-    .yesong .rounds { display: flex; flex-direction: column; gap: 0.45rem; }
-    .round {
-      display: grid;
-      grid-template-columns: 6.5rem minmax(0, 1fr) minmax(0, 1fr) 8.5rem;
-      border: 1px solid var(--line);
-      background: var(--paper);
-    }
-    .round span {
-      border: 0;
-      border-left: 1px solid var(--line);
-      border-radius: 0;
-      text-align: center;
-    }
-    .round span:first-child { border-left: 0; color: var(--ink); font-weight: 500; }
-    .round .result { color: var(--ink); font-weight: 500; }
-    .seat { display: flex; align-items: center; gap: 0.55rem; margin: 0.55rem 0 0; }
-    .phase {
-      margin: 0.2rem 0;
-      padding: 0.15rem 0 0.15rem 0.7rem;
-      border-left: 2px solid var(--line);
-      color: var(--muted);
-    }
-    .schism { margin: 0.85rem 0 0.4rem; }
-    .schism .fork { margin: 0 0 0.45rem; }
-    .schism .fork-arms h4 { margin: 0; text-align: center; }
-    .follow { display: flex; flex-direction: column; gap: 0.45rem; }
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.7rem;
-      position: relative;
-    }
-    .two-col::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 50%;
-      border-left: 1px solid var(--ink);
-    }
-    .branch-step {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 0.75rem;
-      min-height: 3.1rem;
-      padding: 0.45rem 0.85rem;
-      background: var(--paper);
-      border: 1px solid var(--line);
-    }
-    .branch-step .when { border: 0; padding: 0; color: var(--ink); font-weight: 500; }
+    .faction .gone { text-decoration: line-through; }
+    .faction .sub { display: block; margin-top: 0.15rem; }
     .sr {
       position: absolute;
       width: 1px;
@@ -523,16 +455,6 @@
       .fork-arms { flex-direction: column; margin-top: 0.6rem; padding-left: 0.8rem; border-left: 2px solid var(--ink); }
       .fork-arms::before, .fork-arms::after, .fork-arms > section::before { display: none; }
       .split { grid-template-columns: 1fr; gap: 0.7rem; }
-      .round { grid-template-columns: 1fr; }
-      .schism .fork-arms {
-        flex-direction: row;
-        margin-top: 1.35rem;
-        padding-left: 0;
-        border-left: 0;
-      }
-      .schism .fork-arms::before,
-      .schism .fork-arms::after,
-      .schism .fork-arms > section::before { display: block; }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -1090,64 +1012,38 @@
         <details class="block" id="bungdang-late" open>
           <summary><h3>붕당 정치의 전개 / 변질</h3></summary>
           <p class="legend">채워진 이름이 그 시기를 주도합니다. 그어진 이름은 배제됩니다.</p>
-          <div class="reigns">
-            <div class="reign"><span class="who">선조</span><div class="sides"><span>동인</span><span class="lead">서인</span></div></div>
-            <div class="reign"><span class="who">광해군</span><div class="sides"><span class="lead">북인</span><span>남인</span><span>서인</span></div></div>
-            <div class="reign"><span class="who">인조</span><div class="sides"><span class="gone">북인</span><span>남인</span><span class="lead">서인</span></div></div>
-            <div class="reign">
-              <span class="who">현종</span>
-              <div class="yesong">
-                <p class="event-line">예송(상복 입는 기간) 농쟁</p>
-                <div class="rounds">
-                  <div class="round">
-                    <span>1차 예송</span>
-                    <span>서인 : 1년주장</span>
-                    <span>남인 3년주장</span>
-                    <span class="result">서인의 승리</span>
-                  </div>
-                  <div class="round">
-                    <span>2차 예송</span>
-                    <span>서인 9개월 주장</span>
-                    <span>남인 1년 주장</span>
-                    <span class="result">남인의 승리</span>
-                  </div>
-                </div>
-                <p class="seat"><span class="lead">남인</span> 남인의 집권</p>
-              </div>
-            </div>
-            <p class="phase">숙종전 : 상대 붕당의 존재 인정 (균형)</p>
-            <div class="reign">
-              <span class="who">숙종</span>
-              <div>
-                <p class="event-line">환국 : 급격한 정치적 변동으로 지배층 교체</p>
-                <div class="sides shift">
-                  <span class="lead">서인</span>
-                  <span class="lead">남인</span>
-                  <span class="lead">서인</span>
-                </div>
-              </div>
-            </div>
-            <div class="schism">
-              <div class="fork two">
-                <p class="fork-root">서인의 분열</p>
-                <div class="fork-arms">
-                  <section><h4>노론</h4></section>
-                  <section><h4>소론</h4></section>
-                </div>
-              </div>
-              <div class="follow">
-                <p class="phase">숙중후 : 상대 붕당 존재 부정</p>
-                <div class="two-col">
-                  <div class="branch-step"><span class="when">경종</span><span>노론</span></div>
-                  <div class="branch-step"><span class="when">경종</span><span class="lead">소론</span></div>
-                </div>
-                <p class="phase">경종후 : 일당 전제화</p>
-                <div class="two-col">
-                  <div class="branch-step"><span class="when">영조</span><span class="lead">노론</span></div>
-                  <div class="branch-step"><span class="when">영조</span><span>소론</span></div>
-                </div>
-              </div>
-            </div>
+          <div class="table-wrap">
+            <table class="fit faction">
+              <caption>붕당 정치의 전개</caption>
+              <thead><tr><th>왕대</th><th>전개</th></tr></thead>
+              <tbody>
+                <tr><th>선조</th><td><span class="name">동인</span><span class="name lead">서인</span></td></tr>
+                <tr><th>광해군</th><td><span class="name lead">북인</span><span class="name">남인</span><span class="name">서인</span></td></tr>
+                <tr><th>인조</th><td><span class="name gone">북인</span><span class="name">남인</span><span class="name lead">서인</span></td></tr>
+                <tr>
+                  <th>현종</th>
+                  <td>
+                    예송(상복 입는 기간) 농쟁
+                    <span class="sub">1차 예송 : 서인 : 1년주장, 남인 3년주장 → 서인의 승리</span>
+                    <span class="sub">2차 예송 : 서인 9개월 주장, 남인 1년 주장 → 남인의 승리</span>
+                    <span class="sub"><span class="name lead">남인</span> 남인의 집권</span>
+                  </td>
+                </tr>
+                <tr><th>숙종전</th><td>상대 붕당의 존재 인정 (균형)</td></tr>
+                <tr>
+                  <th>숙종</th>
+                  <td>
+                    환국 : 급격한 정치적 변동으로 지배층 교체
+                    <span class="sub"><span class="name lead">서인</span> → <span class="name lead">남인</span> → <span class="name lead">서인</span></span>
+                    <span class="sub">서인의 분열 : 노론 / 소론</span>
+                  </td>
+                </tr>
+                <tr><th>숙중후</th><td>상대 붕당 존재 부정</td></tr>
+                <tr><th>경종</th><td><span class="name">노론</span><span class="name lead">소론</span></td></tr>
+                <tr><th>경종후</th><td>일당 전제화</td></tr>
+                <tr><th>영조</th><td><span class="name">소론</span><span class="name lead">노론</span></td></tr>
+              </tbody>
+            </table>
           </div>
         </details>
 
