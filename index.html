@@ -78,7 +78,7 @@
     .brand { margin: 0; color: var(--muted); font-size: 0.78rem; }
     h1 { margin: 0; font-family: "Noto Serif KR", Batang, serif; font-size: 1.4rem; font-weight: 600; }
     .tools { display: flex; align-items: flex-end; gap: 0.45rem; }
-    .search { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.82rem; color: var(--muted); }
+    .search { position: relative; display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.82rem; color: var(--muted); }
     .search input, .theme {
       font: inherit;
       color: var(--ink);
@@ -87,6 +87,33 @@
       padding: 0.38rem 0.55rem;
     }
     .search input { width: 13rem; }
+    .suggest {
+      position: absolute;
+      top: calc(100% + 0.15rem);
+      left: 0;
+      right: 0;
+      z-index: 8;
+      margin: 0;
+      padding: 0.2rem 0;
+      list-style: none;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      max-height: 16rem;
+      overflow: auto;
+    }
+    .suggest li { margin: 0; max-width: none; padding: 0.38rem 0.6rem; cursor: pointer; color: var(--ink); }
+    .suggest li[aria-selected="true"] { background: color-mix(in srgb, var(--ink) 8%, var(--paper)); }
+    .suggest .typed { font-weight: 500; }
+    .suggest .rest { color: var(--muted); }
+    mark.hit {
+      background: #efe3a4;
+      color: #221c16;
+      padding: 0 0.05rem;
+    }
+    html[data-theme="dark"] mark.hit {
+      background: #5c4d28;
+      color: #f4efe6;
+    }
     .theme { cursor: pointer; white-space: nowrap; }
     .timeline {
       margin: 0.45rem 0 0;
@@ -536,7 +563,8 @@
       <div class="tools">
         <form class="search" role="search">
           <label for="q">노트 찾기</label>
-          <input id="q" name="q" type="search" placeholder="예: 대동법" autocomplete="off">
+          <input id="q" name="q" type="search" placeholder="예: 대동법" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggest" aria-expanded="false">
+          <ul id="suggest" class="suggest" role="listbox" hidden></ul>
         </form>
         <button type="button" class="theme" id="theme" aria-pressed="false">다크 모드</button>
       </div>
@@ -1249,11 +1277,130 @@
   <script>
     const form = document.querySelector(".search");
     const input = document.querySelector("#q");
+    const suggest = document.querySelector("#suggest");
     const empty = document.querySelector("#empty");
+    const content = document.querySelector("#content");
     const chapters = [...document.querySelectorAll("details.chapter")];
+    let suggestItems = [];
+    let suggestActive = -1;
+
+    function termsFrom(text) {
+      const found = [];
+      const clean = text.replace(/\s+/g, " ").trim();
+      if (clean.length >= 2 && clean.length <= 24) found.push(clean);
+      clean.split(/[\s,·:→/|()—\-]+/).forEach((part) => {
+        const word = part.trim();
+        if (word.length >= 2 && word.length <= 16) found.push(word);
+      });
+      return found;
+    }
+
+    const terms = [...new Set(
+      [...content.querySelectorAll("h2, h3, h4, li, td, th, p, .name")].flatMap((node) => termsFrom(node.textContent))
+    )];
+
+    function clearMarks() {
+      content.querySelectorAll("mark.hit").forEach((mark) => {
+        mark.replaceWith(document.createTextNode(mark.textContent));
+      });
+      content.normalize();
+    }
+
+    function highlight(query) {
+      const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          if (!node.nodeValue.includes(query)) return NodeFilter.FILTER_REJECT;
+          const parent = node.parentElement;
+          if (!parent || parent.closest("mark, script, style")) return NodeFilter.FILTER_REJECT;
+          if (parent.closest("[hidden]")) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach((node) => {
+        const text = node.nodeValue;
+        const frag = document.createDocumentFragment();
+        let from = 0;
+        let at = text.indexOf(query);
+        while (at >= 0) {
+          if (at > from) frag.append(text.slice(from, at));
+          const mark = document.createElement("mark");
+          mark.className = "hit";
+          mark.textContent = query;
+          frag.append(mark);
+          from = at + query.length;
+          at = text.indexOf(query, from);
+        }
+        if (from < text.length) frag.append(text.slice(from));
+        node.parentNode.replaceChild(frag, node);
+      });
+    }
+
+    function hideSuggest() {
+      suggest.hidden = true;
+      suggestActive = -1;
+      input.setAttribute("aria-expanded", "false");
+      input.removeAttribute("aria-activedescendant");
+    }
+
+    function paintSuggest() {
+      suggest.innerHTML = "";
+      suggestItems.forEach((term, index) => {
+        const item = document.createElement("li");
+        item.id = "suggest-" + index;
+        item.setAttribute("role", "option");
+        item.setAttribute("aria-selected", String(index === suggestActive));
+        const at = term.indexOf(input.value.trim());
+        const query = input.value.trim();
+        if (at === 0) {
+          item.innerHTML = '<span class="typed"></span><span class="rest"></span>';
+          item.querySelector(".typed").textContent = query;
+          item.querySelector(".rest").textContent = term.slice(query.length);
+        } else {
+          item.textContent = term;
+        }
+        item.addEventListener("mousedown", (event) => {
+          event.preventDefault();
+          choose(term);
+        });
+        suggest.append(item);
+      });
+    }
+
+    function showSuggest(query) {
+      const q = query.trim();
+      if (!q) {
+        hideSuggest();
+        return;
+      }
+      const starts = terms.filter((term) => term.startsWith(q) && term !== q && term.length <= 18).sort((a, b) => a.length - b.length);
+      const contains = terms.filter((term) => !term.startsWith(q) && term.includes(q) && term.length <= 12).sort((a, b) => a.length - b.length);
+      suggestItems = [...starts, ...contains].slice(0, 8);
+      if (!suggestItems.length) {
+        hideSuggest();
+        return;
+      }
+      if (suggestActive >= suggestItems.length) suggestActive = -1;
+      suggest.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+      paintSuggest();
+    }
+
+    function choose(term) {
+      input.value = term;
+      hideSuggest();
+      const url = new URL(location.href);
+      url.searchParams.set("q", term);
+      history.replaceState(null, "", url);
+      apply(term);
+      const hit = content.querySelector("mark.hit");
+      if (hit) hit.scrollIntoView({ block: "center" });
+    }
 
     function apply(query) {
       const q = query.trim();
+      clearMarks();
       let shown = 0;
       chapters.forEach((chapter) => {
         const blocks = [...chapter.querySelectorAll(".block")];
@@ -1271,6 +1418,7 @@
         if (any) shown += 1;
       });
       empty.style.display = shown ? "none" : "block";
+      if (q) highlight(q);
     }
 
     const initial = new URLSearchParams(location.search).get("q");
@@ -1278,14 +1426,43 @@
       input.value = initial;
       apply(initial);
     }
-    input.addEventListener("input", () => apply(input.value));
+    input.addEventListener("input", () => {
+      suggestActive = -1;
+      showSuggest(input.value);
+      apply(input.value);
+    });
+    input.addEventListener("keydown", (event) => {
+      if (event.isComposing) return;
+      if (event.key === "ArrowDown" && !suggest.hidden) {
+        event.preventDefault();
+        suggestActive = Math.min(suggestActive + 1, suggestItems.length - 1);
+        paintSuggest();
+        input.setAttribute("aria-activedescendant", "suggest-" + suggestActive);
+      } else if (event.key === "ArrowUp" && !suggest.hidden) {
+        event.preventDefault();
+        suggestActive = Math.max(suggestActive - 1, 0);
+        paintSuggest();
+        input.setAttribute("aria-activedescendant", "suggest-" + suggestActive);
+      } else if (event.key === "Escape") {
+        hideSuggest();
+      } else if (event.key === "Enter" && !suggest.hidden && suggestActive >= 0) {
+        event.preventDefault();
+        choose(suggestItems[suggestActive]);
+      }
+    });
+    input.addEventListener("blur", () => {
+      window.setTimeout(hideSuggest, 120);
+    });
     form.addEventListener("submit", (event) => {
       event.preventDefault();
+      hideSuggest();
       const url = new URL(location.href);
       if (input.value.trim()) url.searchParams.set("q", input.value.trim());
       else url.searchParams.delete("q");
       history.replaceState(null, "", url);
       apply(input.value);
+      const hit = content.querySelector("mark.hit");
+      if (hit) hit.scrollIntoView({ block: "center" });
     });
 
     const links = [...document.querySelectorAll(".toc a")];
