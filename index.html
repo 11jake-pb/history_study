@@ -4,18 +4,39 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>조선 시대 노트</title>
+  <script>
+    (function () {
+      var saved = localStorage.getItem("history-theme");
+      var theme = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&family=Noto+Serif+KR:wght@600&display=swap">
   <style>
     :root {
+      color-scheme: light;
       --bg: #f3efe6;
       --paper: #fffdf9;
       --ink: #221c16;
       --muted: #5e564c;
       --line: #e3d9c8;
+      --link: #1a3f66;
       --early: #1f6b4a;
       --mid: #9a4324;
       --late: #1e4d7b;
       --header: 7.6rem;
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #171512;
+      --paper: #24211c;
+      --ink: #f4efe6;
+      --muted: #c8bbaa;
+      --line: #3d362e;
+      --link: #b9d2ef;
+      --early: #8dccb0;
+      --mid: #e3a48a;
+      --late: #9ebfe6;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -28,13 +49,14 @@
       line-height: 1.7;
       word-break: keep-all;
     }
-    a { color: #1a3f66; }
+    a { color: var(--link); }
     :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
     .skip {
       position: absolute;
       left: 0.6rem;
       top: -3rem;
-      background: #fff;
+      background: var(--paper);
+      color: var(--ink);
       padding: 0.4rem 0.6rem;
       z-index: 20;
     }
@@ -57,15 +79,17 @@
     }
     .brand { margin: 0; color: var(--muted); font-size: 0.78rem; }
     h1 { margin: 0; font-family: "Noto Serif KR", Batang, serif; font-size: 1.4rem; font-weight: 600; }
+    .tools { display: flex; align-items: flex-end; gap: 0.45rem; }
     .search { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.82rem; color: var(--muted); }
-    .search input {
+    .search input, .theme {
       font: inherit;
       color: var(--ink);
       background: var(--paper);
-      border: 1px solid #d5cbbd;
+      border: 1px solid var(--line);
       padding: 0.38rem 0.55rem;
-      width: 13rem;
     }
+    .search input { width: 13rem; }
+    .theme { cursor: pointer; white-space: nowrap; }
     .timeline {
       max-width: 1120px;
       margin: 0.45rem auto 0;
@@ -132,12 +156,11 @@
     p, li { max-width: 68ch; }
     .path, .note, .table-wrap, .compare, .defs, .chips { max-width: none; }
     .path, .note {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      padding: 0.55rem 0.75rem;
       margin: 0.45rem 0;
+      padding: 0.15rem 0 0.15rem 0.7rem;
+      border-left: 2px solid var(--line);
     }
-    .note { border-left: 3px solid var(--era, #c4b8a4); }
+    .note { border-left-color: var(--era, var(--line)); }
     ul, ol { margin: 0.3rem 0 0.5rem; padding-left: 1.2rem; }
     li { margin: 0.2rem 0; }
     .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
@@ -158,9 +181,48 @@
     .defs div { background: var(--paper); border: 1px solid var(--line); padding: 0.45rem 0.6rem; }
     .defs dt { font-weight: 500; }
     .defs dd { margin: 0; color: var(--muted); }
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
     .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; padding: 0; margin: 0.3rem 0 0.6rem; list-style: none; }
     .chips li { margin: 0; max-width: none; background: var(--paper); border: 1px solid var(--line); padding: 0.15rem 0.5rem; }
-    .table-wrap { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); }
+    .table-wrap { overflow-x: auto; }
+    .org { padding: 0.2rem 0 0.5rem; }
+    .org ul {
+      display: block;
+      margin: 0.15rem 0 0.15rem 0.35rem;
+      padding: 0.1rem 0 0.1rem 0.9rem;
+      list-style: none;
+      border-left: 1px solid var(--line);
+    }
+    .org > ul { margin-left: 0; padding-left: 0; border-left: 0; }
+    .org li {
+      display: block;
+      margin: 0.4rem 0;
+      max-width: none;
+      padding: 0;
+      list-style: none;
+    }
+    .org li::before, .org li::after { content: none; }
+    .node {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.45rem;
+      padding: 0.28rem 0.55rem;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      line-height: 1.35;
+    }
+    .node b { font-weight: 500; }
+    .node small { color: var(--muted); font-size: 0.82rem; }
+    .node.king { border-color: var(--ink); }
     table { width: 100%; border-collapse: collapse; }
     caption { text-align: left; padding: 0.45rem 0.65rem 0; font-weight: 500; }
     th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.65rem; border-top: 1px solid var(--line); }
@@ -177,8 +239,8 @@
     #empty { display: none; padding: 1rem 0; }
     @media (max-width: 800px) {
       :root { --header: 8.4rem; }
-      .top-row, .search input { width: 100%; }
-      .top-row { flex-direction: column; align-items: stretch; }
+      .top-row, .tools, .search, .search input { width: 100%; }
+      .top-row, .tools { flex-direction: column; align-items: stretch; }
       .layout { grid-template-columns: 1fr; }
       .toc {
         position: static;
@@ -208,10 +270,13 @@
         <p class="brand">history study</p>
         <h1>조선 시대 노트</h1>
       </div>
-      <form class="search" role="search">
-        <label for="q">노트 찾기</label>
-        <input id="q" name="q" type="search" placeholder="예: 대동법" autocomplete="off">
-      </form>
+      <div class="tools">
+        <form class="search" role="search">
+          <label for="q">노트 찾기</label>
+          <input id="q" name="q" type="search" placeholder="예: 대동법" autocomplete="off">
+        </form>
+        <button type="button" class="theme" id="theme" aria-pressed="false">다크 모드</button>
+      </div>
     </div>
     <nav class="timeline" aria-label="시기">
       <a href="#founding">건국</a>
@@ -323,23 +388,40 @@
 
         <section class="block" id="offices">
           <h3>통치체제</h3>
-          <dl class="defs">
-            <div><dt>왕</dt><dd></dd></div>
-            <div><dt>의정부</dt><dd>정책</dd></div>
-            <div><dt>승정원</dt><dd>왕명 전달</dd></div>
-            <div><dt>의금부</dt><dd>재판, 사법</dd></div>
-            <div><dt>사헌부</dt><dd>3사 · 관리, 감찰</dd></div>
-            <div><dt>사간원</dt><dd>3사 · 간언, 비판</dd></div>
-            <div><dt>홍문관</dt><dd>3사 · 조언, 고문</dd></div>
-            <div><dt>춘추관</dt><dd>역사책 편찬</dd></div>
-            <div><dt>성균관</dt><dd>교육 기관</dd></div>
-            <div><dt>한성부</dt><dd>수도 경비</dd></div>
-          </dl>
-          <p class="note">3사 : 권력 독점 방지 / 언론기관</p>
-          <p>의정부 산하 6조</p>
-          <ul class="chips">
-            <li>이조</li><li>호조</li><li>예조</li><li>병조</li><li>형조</li><li>공조</li>
-          </ul>
+          <figure class="org">
+            <figcaption class="sr">왕 아래 중앙 기구. 의정부 아래에 6조, 3사는 사헌부·사간원·홍문관.</figcaption>
+            <ul>
+              <li>
+                <span class="node king"><b>왕</b></span>
+                <ul>
+                  <li>
+                    <span class="node"><b>의정부</b><small>정책</small></span>
+                    <ul>
+                      <li><span class="node"><b>이조</b></span></li>
+                      <li><span class="node"><b>호조</b></span></li>
+                      <li><span class="node"><b>예조</b></span></li>
+                      <li><span class="node"><b>병조</b></span></li>
+                      <li><span class="node"><b>형조</b></span></li>
+                      <li><span class="node"><b>공조</b></span></li>
+                    </ul>
+                  </li>
+                  <li><span class="node"><b>승정원</b><small>왕명 전달</small></span></li>
+                  <li><span class="node"><b>의금부</b><small>재판, 사법</small></span></li>
+                  <li>
+                    <span class="node"><b>3사</b><small>권력 독점 방지 / 언론기관</small></span>
+                    <ul>
+                      <li><span class="node"><b>사헌부</b><small>관리, 감찰</small></span></li>
+                      <li><span class="node"><b>사간원</b><small>간언, 비판</small></span></li>
+                      <li><span class="node"><b>홍문관</b><small>조언, 고문</small></span></li>
+                    </ul>
+                  </li>
+                  <li><span class="node"><b>춘추관</b><small>역사책 편찬</small></span></li>
+                  <li><span class="node"><b>성균관</b><small>교육 기관</small></span></li>
+                  <li><span class="node"><b>한성부</b><small>수도 경비</small></span></li>
+                </ul>
+              </li>
+            </ul>
+          </figure>
         </section>
 
         <section class="block">
@@ -899,6 +981,20 @@
           document.querySelector(".toc").open = false;
         }
       });
+    });
+
+    const themeBtn = document.querySelector("#theme");
+    function paintTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      const dark = theme === "dark";
+      themeBtn.textContent = dark ? "라이트 모드" : "다크 모드";
+      themeBtn.setAttribute("aria-pressed", String(dark));
+    }
+    paintTheme(document.documentElement.dataset.theme || "light");
+    themeBtn.addEventListener("click", () => {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      localStorage.setItem("history-theme", next);
+      paintTheme(next);
     });
   </script>
 </body>
