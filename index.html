@@ -475,7 +475,57 @@
       border: 1px solid var(--line);
       padding: 0.22rem 0.75rem;
     }
-    .tabs button[aria-selected="true"] { color: var(--ink); background: var(--paper); border-color: var(--ink); }
+    .tabs button[aria-selected="true"],
+    .subjects button[aria-selected="true"],
+    .viewbar button[aria-selected="true"] { color: var(--ink); background: var(--paper); border-color: var(--ink); }
+    .subjects, .viewbar { display: flex; gap: 0.35rem; }
+    .subjects { margin-top: 0.55rem; }
+    .subjects button, .viewbar button {
+      font: inherit;
+      cursor: pointer;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--line);
+      padding: 0.22rem 0.75rem;
+    }
+    .viewbar { margin: 0 0 0.8rem; }
+    .social-main { min-width: 0; }
+    body[data-subject="history"] #social,
+    body[data-subject="social"] #history { display: none; }
+    body[data-subject="social"] .timeline { display: none; }
+    #social main[data-view="map"] { display: none; }
+    body[data-social-view="map"] #social main[data-view="struct"] { display: none; }
+    body[data-social-view="map"] #social main[data-view="map"] { display: block; }
+    .mind {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 0.8rem 1rem;
+      align-items: center;
+      margin: 0.6rem 0 1.2rem;
+    }
+    .mind-core {
+      border: 2px solid var(--ink);
+      background: var(--paper);
+      padding: 0.75rem 0.9rem;
+      text-align: center;
+      font-weight: 500;
+    }
+    .mind-in, .mind-out { display: flex; flex-direction: column; gap: 0.55rem; }
+    .mind section {
+      margin: 0;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 0.55rem 0.7rem;
+    }
+    .mind-in section { border-right: 2px solid var(--ink); }
+    .mind-out section { border-left: 2px solid var(--ink); }
+    .mind h4 { margin: 0 0 0.2rem; }
+    .mind p { margin: 0.15rem 0; }
+    @media (max-width: 700px) {
+      .mind { grid-template-columns: 1fr; }
+      .mind-in section { border-right: 1px solid var(--line); border-bottom: 2px solid var(--ink); }
+      .mind-out section { border-left: 1px solid var(--line); border-top: 2px solid var(--ink); }
+    }
     body:not([data-tab="notes"]) .timeline,
     body:not([data-tab="notes"]) .layout { display: none; }
     .panel { display: none; padding: 1rem 1.6rem 3rem; }
@@ -621,7 +671,7 @@
     }
   </style>
 </head>
-<body data-tab="notes">
+<body data-tab="notes" data-subject="history" data-social-view="struct">
   <a class="skip" href="#content">본문으로</a>
   <header class="top">
     <div class="top-row">
@@ -638,6 +688,10 @@
         <button type="button" class="theme" id="theme" aria-pressed="false">다크 모드</button>
       </div>
     </div>
+    <nav class="subjects" aria-label="과목">
+      <button type="button" data-subject="history" aria-selected="true">역사</button>
+      <button type="button" data-subject="social" aria-selected="false">사회</button>
+    </nav>
     <nav class="tabs" aria-label="보기">
       <button type="button" data-tab="notes" aria-selected="true">노트</button>
       <button type="button" data-tab="study" aria-selected="false">학습</button>
@@ -657,7 +711,7 @@
     </nav>
   </header>
 
-  <div class="layout">
+  <div class="layout" id="history">
     <details class="toc" open>
       <summary>목차</summary>
       <nav aria-label="목차">
@@ -681,7 +735,7 @@
     </details>
 
     <main id="content">
-      <p id="empty">맞는 단원이 없습니다.</p>
+      <p id="empty" class="empty">맞는 단원이 없습니다.</p>
 
       <details class="chapter" open id="ch-rule" data-era="early"><summary><p class="kicker">조선 전기</p><h2>통치 체제와 대외 관계</h2></summary>
 
@@ -1342,6 +1396,595 @@
     </main>
   </div>
 
+  <div class="layout" id="social">
+    <details class="toc" open>
+      <summary>목차</summary>
+      <nav aria-label="사회 목차">
+        <p class="phone-lead">단원을 고르면 그 단원만 펼쳐집니다.</p>
+        <p class="group">인구</p>
+        <a href="#ch-pop" data-era="early">인구 변화와 인구 문제</a>
+        <p class="group">도시</p>
+        <a href="#ch-city" data-era="mid">사람이 만든 삶터, 도시</a>
+        <p class="group">경제</p>
+        <a href="#ch-eco" data-era="late">글로벌 경제 활동과 지역 변화</a>
+        <p class="group">환경</p>
+        <a href="#ch-env" data-era="early">환경 문제와 지속 가능한 환경</a>
+      </nav>
+    </details>
+    <div class="social-main">
+      <div class="viewbar" aria-label="사회 노트 형식">
+        <button type="button" data-social-view="struct" aria-selected="true">구조</button>
+        <button type="button" data-social-view="map" aria-selected="false">마인드맵</button>
+      </div>
+      <main id="social-content" data-view="struct">
+        <p class="empty">맞는 단원이 없습니다.</p>
+
+        <details class="chapter" open id="ch-pop" data-era="early"><summary><p class="kicker">7단원</p><h2>인구 변화와 인구 문제</h2></summary>
+          <details class="block" id="pop-dist" open>
+            <summary><h3>세계와 우리나라의 인구 분포</h3></summary>
+            <p>인구 분포는 자연적 요인과 인문적 요인에 영향을 받는다.</p>
+            <div class="fork two">
+              <p class="fork-root">인구 분포</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>자연적 요인</h4>
+                  <p>기후와 지형</p>
+                  <ul>
+                    <li>온화한 기후, 평야 → 농경에 유리하여 인구가 조밀하다.</li>
+                    <li>극한 기후, 산맥 등 → 농경에 불리하여 인구가 희박하다.</li>
+                  </ul>
+                </section>
+                <section>
+                  <h4>인문적 요인</h4>
+                  <p>경제와 일자리. 산업 혁명 이후 과학기술로 자연환경을 극복할 수 있고, 식량을 멀리서 실어 오기가 쉬워지면서 영향이 더 커졌다.</p>
+                  <p class="path">일자리 풍부, 경제 발달, 교통 편리, 2·3차 산업 발달 → 인구가 모임 → 인구 밀도가 높다.</p>
+                </section>
+              </div>
+            </div>
+            <p class="note">인구 밀도: 지역에 인구가 몰린 정도. 1㎢ 안의 인구수.</p>
+            <div class="table-wrap">
+              <table>
+                <caption>지역별 인구 분포</caption>
+                <thead><tr><th>구분</th><th>예시</th><th>특징</th></tr></thead>
+                <tbody>
+                  <tr><th>조밀</th><td>서부 유럽(파리), 중국 동남부, 미국 북동부(뉴욕)</td><td>방글라데시: 평야, 비옥한 토양, 인구 부양력이 높다. 네덜란드: 산업화 수준이 높다.</td></tr>
+                  <tr><th>희박</th><td>사하라 사막, 그린란드, 아마존 열대 우림</td><td>몽골: 산지와 사막. 캐나다: 냉대 기후, 툰드라, 경지가 적다.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h4>대한민국</h4>
+            <div class="fork two">
+              <p class="fork-root">우리나라 인구 분포</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>자연적 요인</h4>
+                  <ul>
+                    <li>남서부: 평야, 온화한 기후 → 인구 밀집</li>
+                    <li>북동부: 산지, 낮은 기후 → 인구 희박</li>
+                  </ul>
+                </section>
+                <section>
+                  <h4>인문적 요인</h4>
+                  <ul>
+                    <li>산업이 발달한 도시로 인구가 집중된다.</li>
+                    <li>대도시, 공업 도시 중심의 인구 밀도</li>
+                    <li>촌락과 산간 지역의 인구 정체</li>
+                  </ul>
+                </section>
+              </div>
+            </div>
+          </details>
+          <details class="block" id="pop-move" open>
+            <summary><h3>인구 유입 지역과 유출 지역</h3></summary>
+            <p>인구 이동: 생활의 터전을 옮겨 새 장소로 이주하는 것.</p>
+            <p>이유: 쾌적한 환경, 좋은 일자리를 찾아 이동한다.</p>
+            <div class="fork two">
+              <p class="fork-root">인구 이동</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>배출 요인</h4>
+                  <p>인구를 밀어내는 요인</p>
+                  <ul>
+                    <li>빈곤, 낮은 임금</li>
+                    <li>일자리 부족</li>
+                    <li>열악한 생활 환경</li>
+                    <li>전쟁과 분쟁</li>
+                    <li>해수면 상승, 가뭄</li>
+                  </ul>
+                </section>
+                <section>
+                  <h4>흡인 요인</h4>
+                  <p>인구를 끌어당기는 요인</p>
+                  <ul>
+                    <li>높은 임금</li>
+                    <li>풍부한 일자리</li>
+                    <li>쾌적한 생활 환경</li>
+                    <li>정치적 안정</li>
+                  </ul>
+                </section>
+              </div>
+            </div>
+            <p class="path">대한민국의 국제 이동: 1963년 독일로 배출 → 1990년 흡인</p>
+            <div class="table-wrap">
+              <table>
+                <caption>유입과 유출</caption>
+                <thead><tr><th></th><th>인구 유입 · 주로 선진국</th><th>인구 유출 · 주로 개발도상국</th></tr></thead>
+                <tbody>
+                  <tr><th>장점</th><td>노동력 부족이 완화된다. 문화적 다양성이 커진다.</td><td>실업률이 감소한다. 해외 이주민이 보낸 돈이 국가 경제에 도움이 된다.</td></tr>
+                  <tr><th>단점</th><td>기존 주민과 이주민이 종교와 언어 차이로 갈등한다.</td><td>인력이 해외로 빠져 자국 산업 성장이 둔화된다.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+          <details class="block" id="pop-problem" open>
+            <summary><h3>인구 문제의 원인과 대책</h3></summary>
+            <div class="fork two">
+              <p class="fork-root">인구 변화</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>선진국 · 느린 증가</h4>
+                  <p class="path">높은 초혼 연령, 가치관 변화 → 낮은 출생률, 노인 인구 증가</p>
+                  <ul>
+                    <li>저출산: 낮은 출생률</li>
+                    <li>고령화: 노인 인구 비중 증가</li>
+                    <li>노인 인구를 부양할 노동력 확보가 어렵다.</li>
+                  </ul>
+                  <p>해결: 출산 장려 정책. 정년 연장, 노인 일자리 확대.</p>
+                </section>
+                <section>
+                  <h4>개발도상국 · 빠른 증가</h4>
+                  <p>높은 출산율, 의학 발달로 낮은 사망률.</p>
+                  <p class="path">빠른 인구 증가 → 식량·일자리 부족, 빈곤</p>
+                  <p>해결: 식량 증산과 경제 개발로 인구 부양력을 높인다. 산아 제한으로 인구 증가를 억제한다.</p>
+                  <p class="note">인구가 국력인 나라는 높은 출생률을 유지한다.</p>
+                </section>
+              </div>
+            </div>
+          </details>
+        </details>
+
+        <details class="chapter" open id="ch-city" data-era="mid"><summary><p class="kicker">8단원</p><h2>사람이 만든 삶터, 도시</h2></summary>
+          <details class="block" id="city-world" open>
+            <summary><h3>세계의 매력적인 도시</h3></summary>
+            <p>도시: 좁은 지역에 많은 사람이 사는 생활 공간. 인구 밀도가 높다.</p>
+            <ul>
+              <li>2·3차 산업 종사자 비율이 높아 생활 모습과 직업이 다양하다.</li>
+              <li>상품, 서비스, 정보, 문화를 제공한다.</li>
+              <li>정치와 행정의 중심지이다.</li>
+              <li>경관은 산업 발달과 독특한 건축물로 다양해진다.</li>
+            </ul>
+            <div class="table-wrap">
+              <table>
+                <caption>특징 있는 도시</caption>
+                <thead><tr><th>도시</th><th>특징</th></tr></thead>
+                <tbody>
+                  <tr><th>베네치아</th><td>다양한 자연환경</td></tr>
+                  <tr><th>베이징</th><td>오랜 역사</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>특징 있는 도시는 다양한 자연환경, 오랜 역사, 찬란한 문화를 가진다.</p>
+            <h4>세계 도시</h4>
+            <p>세계적인 영향력을 가진 도시. 세계화로 도시 사이 교류가 활발해지면서 나타난다.</p>
+            <ul>
+              <li>국제 금융 기관, 다국적 기업 본사, 국제기구</li>
+              <li>세계 경제 활동의 중심지</li>
+              <li>예: 뉴욕, 런던, 도쿄</li>
+            </ul>
+          </details>
+          <details class="block" id="city-land" open>
+            <summary><h3>도시의 다양한 경관</h3></summary>
+            <div class="table-wrap">
+              <table>
+                <caption>도시 내부의 모습</caption>
+                <thead><tr><th>지역</th><th>모습</th></tr></thead>
+                <tbody>
+                  <tr><th>도심</th><td>도시의 중심. 고층 건물 밀집(백화점, 기업 본사). 낮에는 사람들로 붐빈다.</td></tr>
+                  <tr><th>도시 공원</th><td>문화유산이 있고, 시민의 휴식 공간이다.</td></tr>
+                  <tr><th>도심 주변 공업 지역</th><td>인쇄 업체가 많다. 주문하는 정부 기관, 광고 회사, 기업 본사가 많은 곳을 선호한다.</td></tr>
+                  <tr><th>주변 지역</th><td>대규모 주거 단지, 학교. 땅이 넓고 지가가 비교적 저렴하다.</td></tr>
+                  <tr><th>주변 공업 지역</th><td>넓은 공업 용지. 지식 산업 센터.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="note">지식 산업 센터: 기업과 기업 지원 시설이 함께 입주하는 건물.</p>
+            <p class="path">지가: 도심(최고가) → 감소 → 주변 지역(비교적 저렴)</p>
+            <p>부도심: 도심 주변에서 교통이 편리한 곳. 도심의 기능을 나눠 맡는다. 상업 기능이 발달해 주변 지역보다 지가가 높다.</p>
+            <p>도시 내부는 공간마다 지가, 교통 여건, 주거와 교육 환경이 달라, 각자 특징에 맞는 곳에 입지한다.</p>
+            <ul>
+              <li>높은 지가: 백화점, 대기업, 은행 본점처럼 높은 지가를 감당할 수 있는 시설.</li>
+              <li>낮은 지가: 공장, 주택 단지.</li>
+              <li>인구 공동화: 낮에는 도심에 사람이 많고, 밤에는 주변 지역의 집으로 돌아가 도심이 빈다.</li>
+            </ul>
+          </details>
+          <details class="block" id="city-grow" open>
+            <summary><h3>도시화의 차이와 도시 문제</h3></summary>
+            <p>도시화: 도시에 사는 사람 비율이 늘고, 도시적 생활 양식이 확대되는 것. 일자리가 많은 도시로 인구가 이동하기 때문이다.</p>
+            <div class="fork two">
+              <p class="fork-root">도시화</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>선진국</h4>
+                  <p>도시화율이 높고, 산업 혁명 이후 오랜 기간 서서히 진행되었다.</p>
+                  <p class="path">교통수단 발달 → 도시 영향권 확대 → 대도시권 형성</p>
+                  <p class="note">대도시권: 밀접한 관계의 대도시와 그 주변 지역. 대도시 근처에 신도시가 건설되기도 한다.</p>
+                  <p>문제: 중심부로 인구가 몰려 교통 체증과 비싼 지가가 생기고, 주민은 주변 지역으로 이주한다.</p>
+                </section>
+                <section>
+                  <h4>개발도상국</h4>
+                  <p>급속한 산업화로 짧은 기간에 빠르게 진행된다.</p>
+                  <p>과도시화: 몇몇 도시로 사람이 몰려, 도시 인구가 산업과 경제 수준을 넘어서 늘어난다.</p>
+                  <p>문제: 도시 기반 시설 부족 → 슬럼 형성.</p>
+                </section>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption>도시 문제 사례</caption>
+                <thead><tr><th>도시</th><th>문제</th></tr></thead>
+                <tbody>
+                  <tr><th>런던</th><td>대기 오염, 교통 체증, 도시 시설 노후화, 인구 공동화 심화</td></tr>
+                  <tr><th>뭄바이</th><td>과도시화, 매우 높은 인구 밀도, 인구 과밀 → 슬럼</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+          <details class="block" id="city-live" open>
+            <summary><h3>살기 좋은 도시</h3></summary>
+            <p>도시 문제: 주택 부족, 교통 혼잡, 환경 오염.</p>
+            <p class="path">산업 구조 변화, 도시 성장 → 기반 시설 노후화 → 도시 재생</p>
+            <p>도시 재생: 낡은 기반 시설을 걷어 내고 새 건물을 짓되, 지역 고유의 문화와 역사는 살린다.</p>
+            <div class="table-wrap">
+              <table>
+                <caption>해결 노력</caption>
+                <thead><tr><th>도시</th><th>노력</th></tr></thead>
+                <tbody>
+                  <tr><th>리버풀</th><td>시설 노후화 → 도시 재생</td></tr>
+                  <tr><th>도쿄</th><td>지역 쇠퇴 → 도시 재생</td></tr>
+                  <tr><th>울산</th><td>오염된 강물 → 생태 회복</td></tr>
+                  <tr><th>샌프란시스코</th><td>친환경 도시</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="fork two">
+              <p class="fork-root">살기 좋은 도시</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>과거</h4>
+                  <p>경제적 조건. 높은 소득, 풍부한 일자리.</p>
+                </section>
+                <section>
+                  <h4>현재</h4>
+                  <p>삶의 질, 체감 행복, 건강, 교육, 환경, 안전, 시민 참여, 공동체.</p>
+                </section>
+              </div>
+            </div>
+            <p class="note">과거와 현재의 조건이 함께 있어야 살기 좋은 도시이다. 캔버라는 11개 분야에서 높은 점수를 받았다. 대한민국 수도권은 소득, 삶의 만족도, 공동체, 주거 점수가 낮고 환경이 가장 열악하다.</p>
+          </details>
+        </details>
+
+        <details class="chapter" open id="ch-eco" data-era="late"><summary><p class="kicker">9단원</p><h2>글로벌 경제 활동과 지역 변화</h2></summary>
+          <details class="block" id="eco-farm" open>
+            <summary><h3>농업 생산의 기업화와 세계화</h3></summary>
+            <p class="path">소규모 자급자족 → 도시화·산업화 → 농산물의 상업적 판매</p>
+            <div class="fork two">
+              <p class="fork-root">농업 생산</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>기업화</h4>
+                  <p>기업이 많은 자본으로 농장을 운영한다. 대규모 재배, 대형 농기계, 품종 개량, 홍보에는 큰 자본이 필요하다.</p>
+                </section>
+                <section>
+                  <h4>세계화</h4>
+                  <p>세계 각지에서 농산물을 생산하고 판매한다. 교통 발달이 바탕이다.</p>
+                </section>
+              </div>
+            </div>
+            <div class="flow" aria-label="바나나">
+              <span>세계 곳곳의 대규모 농장에서 재배 (세계화)</span>
+              <span>노동자가 수확 (기업화)</span>
+              <span>기계로 공장까지 운반 (기업화)</span>
+              <span>세척, 포장 (기업화)</span>
+              <span>트럭·선박·항공기로 전 세계 수출 (세계화)</span>
+              <span>세계 시장과 마트에서 판매 (기업화)</span>
+            </div>
+            <h4>생산 지역의 변화</h4>
+            <ul>
+              <li>여러 작물의 소규모 재배는 줄어든다.</li>
+              <li>상품성 높은 몇몇 작물의 대규모 재배는 늘어난다.</li>
+              <li>육류 소비가 늘면 가축을 기르는 초지가 확대된다.</li>
+              <li>필리핀: 쌀농사 논 → 대규모 바나나 농장</li>
+              <li>인도네시아: 화전 농업 → 기름야자 농장</li>
+            </ul>
+            <h4>소비 지역의 변화</h4>
+            <p class="path">쉽고 저렴한 외국 농산물 → 수입 증가 → 국내 농산물 감소 → 외국 의존도 증가 → 가격 급등 → 안정적 식량 확보가 어려워짐</p>
+            <div class="table-wrap">
+              <table>
+                <caption>먹거리의 세계화</caption>
+                <thead><tr><th>지역</th><th>내용</th></tr></thead>
+                <tbody>
+                  <tr><th>두바이</th><td>석유 수출금으로 각지의 먹거리를 수입한다.</td></tr>
+                  <tr><th>캐나다</th><td>커뮤니티 가든. 주민이 채소와 과일을 기른다.</td></tr>
+                  <tr><th>미국</th><td>옥상 농장</td></tr>
+                  <tr><th>나우루</th><td>독립 뒤 외국 식품이 들어왔다. 전통 먹거리의 경쟁력이 없어 대부분 수입하고, 즉석·냉동식품에 의존해 비만, 과체중, 당뇨병이 생긴다.</td></tr>
+                  <tr><th>보르네오섬</th><td>팜유 농장 때문에 열대 우림이 파괴된다.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+          <details class="block" id="eco-firm" open>
+            <summary><h3>다국적 기업의 공간적 분업</h3></summary>
+            <p>다국적 기업은 전 세계가 고객이고, 세계 경제에서 큰 비중을 차지한다. 교통과 통신이 발달해 국가 간 경제 교류가 활발하고, 여러 나라에 연구소, 공장, 판매 지점을 둔다.</p>
+            <p class="path">소규모로 시작 → 규모가 커짐 → 연구·개발과 생산 기능을 세계 여러 지역으로 나눔</p>
+            <div class="table-wrap">
+              <table>
+                <caption>시설과 위치</caption>
+                <thead><tr><th>시설</th><th>위치</th></tr></thead>
+                <tbody>
+                  <tr><th>연구소, 본사</th><td>선진국</td></tr>
+                  <tr><th>생산 공장, 판매 지점</th><td>생산과 판매에 유리한 지역. 개발도상국은 땅값과 임금이 낮아 생산 비용이 줄어든다. 선진국은 소비 시장을 확보하고 무역 장벽을 넘을 수 있다.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="fork two">
+              <p class="fork-root">생산 공장이 지역에 미치는 영향</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>들어선 지역</h4>
+                  <p>일자리 증가, 관련 산업 발달 → 경제 활성화</p>
+                </section>
+                <section>
+                  <h4>빠져나간 지역</h4>
+                  <p>실업자 증가, 일거리 감소 → 경제 침체</p>
+                </section>
+              </div>
+            </div>
+          </details>
+          <details class="block" id="eco-service" open>
+            <summary><h3>세계화와 서비스업</h3></summary>
+            <ul>
+              <li>세계 경제에서 서비스업 비중이 커진다.</li>
+              <li>소득이 늘면 교육, 의료, 관광, 복지 수요가 늘어난다.</li>
+              <li>제조업에서 서비스업으로 직군이 바뀐다.</li>
+              <li>교통과 정보 통신이 발달하면 시간과 공간의 제약이 줄어 서비스업이 확대된다.</li>
+              <li>유통, 금융, 관광 서비스업이 성장한다.</li>
+            </ul>
+            <p class="path">전자 상거래: 대면 상점 없이 구매 → 택배 산업 발달</p>
+            <div class="table-wrap">
+              <table>
+                <caption>해외 직접 구매가 늘 때의 변화</caption>
+                <thead><tr><th>누구</th><th>유리한 점</th><th>어려운 점</th></tr></thead>
+                <tbody>
+                  <tr><th>소비자</th><td>국내에 없는 물건을 저렴하게 산다.</td><td>교환, 환불, 수리가 어렵다.</td></tr>
+                  <tr><th>국내 기업</th><td>세계 시장을 개척할 기회가 된다.</td><td>고객과 매출이 줄어 회사 운영이 어려워진다.</td></tr>
+                  <tr><th>운송 업체</th><td>항공 화물과 택배가 늘어 매출과 산업 규모가 커진다.</td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>관광의 세계화: 경제적 풍요, 여가 시간 증가, 교통과 정보 통신 발달로 해외여행이 편리해진다.</p>
+            <p>교통, 숙박, 오락 산업이 성장하고 지역 주민이 고용되어 경제가 활성화된다. 개발도상국에서 효과가 크다.</p>
+            <ul>
+              <li>문제: 현지 주민의 수입은 매우 적고, 선진국 여행사와 관광 안내인의 수입만 늘어난다. 무분별한 개발은 환경을 파괴한다.</li>
+              <li>해결: 공정 여행(착한 여행). 관광지 환경을 파괴하지 않고, 현지 주민에게 혜택이 더 돌아가게 한다.</li>
+            </ul>
+          </details>
+        </details>
+
+        <details class="chapter" open id="ch-env" data-era="early"><summary><p class="kicker">10단원</p><h2>환경 문제와 지속 가능한 환경</h2></summary>
+          <details class="block" id="env-climate" open>
+            <summary><h3>전 지구적 기후 변화</h3></summary>
+            <p class="path">화석 연료 사용 → 온실가스 증가 → 온실가스 농도 증가 → 지구 온난화</p>
+            <div class="table-wrap">
+              <table>
+                <caption>이상 기후로 인한 피해와 변화</caption>
+                <thead><tr><th>구분</th><th>내용</th></tr></thead>
+                <tbody>
+                  <tr><th>피해</th><td>노르웨이 빙하 축소, 차드호 면적 축소, 오스트레일리아 대보초 파괴, 미국 루이지애나주 홍수, 투발루 침수</td></tr>
+                  <tr><th>변화</th><td>아열대 과일 재배 지역 확대, 북극 항로(북극해 운항)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="mind" aria-label="지구 온난화를 중심으로 한 문제">
+              <div class="mind-in">
+                <section><h4>홍수</h4><p>가옥 침수</p></section>
+                <section><h4>가뭄</h4><p>호수 면적 축소</p></section>
+              </div>
+              <div class="mind-core">지구 온난화</div>
+              <div class="mind-out">
+                <section><h4>해수 온도 상승</h4><p>대보초 파괴</p></section>
+                <section><h4>빙하 축소</h4><p>해수면 상승 → 해안 저지대 침수</p></section>
+              </div>
+            </div>
+            <h4>해결</h4>
+            <ul>
+              <li>대한민국: 탄소 성적 표지 제도(온실가스 배출량 표기), 온실가스 배출권 거래</li>
+              <li>국제 협약: 기후 변화 협약. 교토 의정서, 파리 협정.</li>
+              <li>파리 협정: 개발도상국의 온실가스 감축 의무를 규정한다.</li>
+              <li>교토 의정서: 선진국도 온실가스를 감축한다.</li>
+              <li>감축 방안을 시행했는지 검증하는 제도, 개발도상국의 감축을 위한 재정적 지원.</li>
+            </ul>
+          </details>
+          <details class="block" id="env-industry" open>
+            <summary><h3>환경 문제를 유발하는 산업</h3></summary>
+            <p>공해 산업: 환경 문제를 일으키는 사업.</p>
+            <p class="path">환경 규제가 엄격 → 공장 설립이 어려움 → 규제가 여유로운 개발도상국으로 이전</p>
+            <ul>
+              <li>생산 시설과 환경 문제가 함께 이동한다.</li>
+              <li>환경 문제가 개발도상국 주민을 위협한다.</li>
+              <li>노동자는 직업병으로 고통받는다.</li>
+            </ul>
+            <p>석면 산업은 발암 물질이다.</p>
+            <p class="path">일본·독일 → 우리나라 → 중국·인도네시아·말레이시아·필리핀</p>
+            <p>의류 산업은 수질 오염을 일으키고 개발도상국으로 이전한다. 폐수로 강물이 오염되면 피해는 주민에게 돌아간다.</p>
+            <p>해결: 환경 규제, 감시 강화, 유해 폐기물과 공해 산업의 불법 이전과 확산 방지.</p>
+            <h4>유해 폐기물</h4>
+            <p>전자 폐기물. 가나는 큰 전자 쓰레기 처리장으로, 유해 지역으로 선정되었다. 금, 구리, 실리콘 등 값진 것을 추출하려다 유독 가스, 납, 카드뮴, 수은 등 중금속에 노출된다.</p>
+            <p class="note">바젤 협약: 유해 폐기물의 국가 간 이동과 처리에 관한 협약. 개발도상국이 주도적 역할을 한다.</p>
+          </details>
+          <details class="block" id="env-life" open>
+            <summary><h3>생활 속의 환경 이슈</h3></summary>
+            <p>환경 이슈: 환경과 관련된 쟁점. 개인, 기업, 국가, 환경 단체의 이해관계가 얽힌다. 미세 플라스틱, 빛 공해, 생활 속 화학 제품 등이 있다.</p>
+            <div class="fork two">
+              <p class="fork-root">먹거리</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>유전자 재조합 식품</h4>
+                  <p>유용한 유전자만 다른 생물에 넣는다. 영양소와 생산성이 늘어 식량 부족에 도움이 된다. 안전성 검증이 되지 않아 이용에 신중해야 한다.</p>
+                </section>
+                <section>
+                  <h4>로컬 푸드</h4>
+                  <p>가까운 지역에서 생산된 음식. 먼 운송은 온실가스와 방부제가 따른다. 로컬 푸드는 친환경적이고 안전하다.</p>
+                </section>
+              </div>
+            </div>
+            <p>쓰레기 처리: 매립은 토양과 물 오염, 소각은 유독 가스와 대기 오염.</p>
+            <ul>
+              <li>쓰레기 종량제: 배출량에 따라 처리 비용을 낸다.</li>
+              <li>분리 배출: 재활용.</li>
+            </ul>
+            <div class="fork two">
+              <p class="fork-root">쓰레기봉투 실명제</p>
+              <div class="fork-arms">
+                <section>
+                  <h4>찬성</h4>
+                  <p>쓰레기 양을 줄일 수 있다.</p>
+                </section>
+                <section>
+                  <h4>반대</h4>
+                  <p>인권 침해, 범죄 악용, 개인 정보 유출.</p>
+                </section>
+              </div>
+            </div>
+          </details>
+        </details>
+      </main>
+
+      <main data-view="map">
+        <p class="empty">맞는 단원이 없습니다.</p>
+        <details class="chapter" open id="ch-map-pop" data-era="early"><summary><p class="kicker">7단원</p><h2>인구 · 대표적인 그림</h2></summary>
+          <details class="block" open>
+            <summary><h3>인구 이동</h3></summary>
+            <div class="mind">
+              <div class="mind-in">
+                <section>
+                  <h4>배출 요인</h4>
+                  <p>빈곤, 낮은 임금</p>
+                  <p>일자리 부족, 열악한 생활 환경</p>
+                  <p>전쟁과 분쟁, 해수면 상승, 가뭄</p>
+                </section>
+              </div>
+              <div class="mind-core">인구 이동</div>
+              <div class="mind-out">
+                <section>
+                  <h4>흡인 요인</h4>
+                  <p>높은 임금, 풍부한 일자리</p>
+                  <p>쾌적한 생활 환경</p>
+                  <p>정치적 안정</p>
+                </section>
+              </div>
+            </div>
+          </details>
+          <details class="block" open>
+            <summary><h3>인구 분포</h3></summary>
+            <div class="mind">
+              <div class="mind-in">
+                <section><h4>자연적 요인</h4><p>온화한 기후, 평야 → 조밀</p><p>극한 기후, 산맥 → 희박</p></section>
+              </div>
+              <div class="mind-core">인구 분포</div>
+              <div class="mind-out">
+                <section><h4>인문적 요인</h4><p>일자리, 경제, 교통, 2·3차 산업 → 인구 밀도 상승</p></section>
+              </div>
+            </div>
+          </details>
+          <details class="block" open>
+            <summary><h3>인구 문제</h3></summary>
+            <div class="mind">
+              <div class="mind-in">
+                <section><h4>선진국</h4><p>낮은 출생률, 고령화</p><p>출산 장려, 정년 연장, 노인 일자리</p></section>
+              </div>
+              <div class="mind-core">인구 문제</div>
+              <div class="mind-out">
+                <section><h4>개발도상국</h4><p>높은 출산율, 낮은 사망률</p><p>식량 증산, 경제 개발, 산아 제한</p></section>
+              </div>
+            </div>
+          </details>
+        </details>
+        <details class="chapter" open id="ch-map-city" data-era="mid"><summary><p class="kicker">8단원</p><h2>도시 · 대표적인 그림</h2></summary>
+          <details class="block" open>
+            <summary><h3>도시 내부</h3></summary>
+            <div class="mind">
+              <div class="mind-in">
+                <section><h4>도심</h4><p>최고 지가, 고층 건물, 낮에 붐빈다</p></section>
+                <section><h4>부도심</h4><p>교통이 편리하고 도심 기능을 나눈다</p></section>
+              </div>
+              <div class="mind-core">도시</div>
+              <div class="mind-out">
+                <section><h4>주변 지역</h4><p>주거 단지, 학교, 비교적 낮은 지가</p></section>
+                <section><h4>세계 도시</h4><p>뉴욕, 런던, 도쿄</p><p>금융, 다국적 기업 본사, 국제기구</p></section>
+              </div>
+            </div>
+          </details>
+          <details class="block" open>
+            <summary><h3>도시화</h3></summary>
+            <div class="mind">
+              <div class="mind-in">
+                <section><h4>선진국</h4><p>오랜 기간, 서서히</p><p>대도시권, 신도시</p><p>교통 체증, 주민의 외곽 이주</p></section>
+              </div>
+              <div class="mind-core">도시화</div>
+              <div class="mind-out">
+                <section><h4>개발도상국</h4><p>짧은 기간, 빠른 증가</p><p>과도시화 → 기반 시설 부족 → 슬럼</p></section>
+              </div>
+            </div>
+          </details>
+        </details>
+        <details class="chapter" open id="ch-map-eco" data-era="late"><summary><p class="kicker">9단원</p><h2>경제 · 대표적인 그림</h2></summary>
+          <details class="block" open>
+            <summary><h3>공간적 분업</h3></summary>
+            <div class="mind">
+              <div class="mind-in">
+                <section><h4>본사 · 연구소</h4><p>선진국</p></section>
+              </div>
+              <div class="mind-core">다국적 기업</div>
+              <div class="mind-out">
+                <section><h4>생산 공장</h4><p>개발도상국: 낮은 땅값과 임금</p><p>선진국: 소비 시장, 무역 장벽</p></section>
+                <section><h4>지역 영향</h4><p>들어오면 일자리와 경제 활성화</p><p>빠지면 실업과 경제 침체</p></section>
+              </div>
+            </div>
+          </details>
+          <details class="block" open>
+            <summary><h3>농업</h3></summary>
+            <div class="mind">
+              <div class="mind-in">
+                <section><h4>기업화</h4><p>많은 자본, 대규모 재배, 대형 농기계</p></section>
+              </div>
+              <div class="mind-core">농업 생산</div>
+              <div class="mind-out">
+                <section><h4>세계화</h4><p>세계 각지의 생산과 판매</p><p>교통 발달</p></section>
+              </div>
+            </div>
+          </details>
+        </details>
+        <details class="chapter" open id="ch-map-env" data-era="early"><summary><p class="kicker">10단원</p><h2>환경 · 지구 온난화</h2></summary>
+          <details class="block" open>
+            <summary><h3>지구 온난화</h3></summary>
+            <p class="path">화석 연료 → 온실가스 증가 → 농도 증가 → 지구 온난화</p>
+            <div class="mind">
+              <div class="mind-in">
+                <section><h4>홍수</h4><p>가옥 침수</p></section>
+                <section><h4>가뭄</h4><p>호수 면적 축소</p></section>
+              </div>
+              <div class="mind-core">지구 온난화</div>
+              <div class="mind-out">
+                <section><h4>해수 온도 상승</h4><p>대보초 파괴</p></section>
+                <section><h4>빙하 축소</h4><p>해수면 상승 → 해안 저지대 침수</p></section>
+              </div>
+            </div>
+          </details>
+        </details>
+      </main>
+    </div>
+  </div>
+
   <div id="study" class="panel"></div>
   <div id="exam" class="panel"></div>
 
@@ -1355,11 +1998,31 @@
     const form = document.querySelector(".search");
     const input = document.querySelector("#q");
     const suggest = document.querySelector("#suggest");
-    const empty = document.querySelector("#empty");
-    const content = document.querySelector("#content");
-    const chapters = [...document.querySelectorAll("details.chapter")];
     let suggestItems = [];
     let suggestActive = -1;
+    let terms = [];
+
+    function noteRoot() {
+      if (document.body.dataset.subject === "social") {
+        const view = document.body.dataset.socialView === "map" ? "map" : "struct";
+        return document.querySelector('#social main[data-view="' + view + '"]');
+      }
+      return document.querySelector("#content");
+    }
+    function chapters() {
+      return [...noteRoot().querySelectorAll("details.chapter")];
+    }
+    function allChapters() {
+      return [...document.querySelectorAll("#history details.chapter, #social details.chapter")];
+    }
+    function emptyEl() {
+      return noteRoot().querySelector(".empty");
+    }
+    function activeToc() {
+      return document.body.dataset.subject === "social"
+        ? document.querySelector("#social .toc")
+        : document.querySelector("#history .toc");
+    }
 
     function termsFrom(text) {
       const found = [];
@@ -1372,19 +2035,22 @@
       return found;
     }
 
-    const terms = [...new Set(
-      [...content.querySelectorAll("h2, h3, h4, li, td, th, p, .name")].flatMap((node) => termsFrom(node.textContent))
-    )];
+    function rebuildTerms() {
+      terms = [...new Set(
+        [...noteRoot().querySelectorAll("h2, h3, h4, li, td, th, p, .name")].flatMap((node) => termsFrom(node.textContent))
+      )];
+    }
+    rebuildTerms();
 
     function clearMarks() {
-      content.querySelectorAll("mark.hit").forEach((mark) => {
+      noteRoot().querySelectorAll("mark.hit").forEach((mark) => {
         mark.replaceWith(document.createTextNode(mark.textContent));
       });
-      content.normalize();
+      noteRoot().normalize();
     }
 
     function highlight(query) {
-      const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+      const walker = document.createTreeWalker(noteRoot(), NodeFilter.SHOW_TEXT, {
         acceptNode(node) {
           if (!node.nodeValue.includes(query)) return NodeFilter.FILTER_REJECT;
           const parent = node.parentElement;
@@ -1471,7 +2137,7 @@
       url.searchParams.set("q", term);
       history.replaceState(null, "", url);
       apply(term);
-      const hit = content.querySelector("mark.hit");
+      const hit = noteRoot().querySelector("mark.hit");
       if (hit) hit.scrollIntoView({ block: "center" });
     }
 
@@ -1488,7 +2154,7 @@
       if (q && document.body.dataset.tab !== "notes") setTab("notes", false);
       clearMarks();
       let shown = 0;
-      chapters.forEach((chapter) => {
+      chapters().forEach((chapter) => {
         const blocks = [...chapter.querySelectorAll(".block")];
         const title = chapter.querySelector("h2").textContent;
         const titleHit = q && title.includes(q);
@@ -1503,7 +2169,7 @@
         if (q && any) chapter.open = true;
         if (any) shown += 1;
       });
-      empty.style.display = shown ? "none" : "block";
+      emptyEl().style.display = shown ? "none" : "block";
       if (q) highlight(q);
     }
 
@@ -1547,7 +2213,7 @@
       else url.searchParams.delete("q");
       history.replaceState(null, "", url);
       apply(input.value);
-      const hit = content.querySelector("mark.hit");
+      const hit = noteRoot().querySelector("mark.hit");
       if (hit) hit.scrollIntoView({ block: "center" });
     });
 
@@ -1561,7 +2227,7 @@
         if (link) link.setAttribute("aria-current", "page");
       });
     }, { rootMargin: "-30% 0px -60% 0px", threshold: 0 });
-    chapters.forEach((chapter) => observer.observe(chapter));
+    allChapters().forEach((chapter) => observer.observe(chapter));
 
     function openTarget(id) {
       const target = document.getElementById(id);
@@ -1573,13 +2239,12 @@
       }
     }
     const phoneQuery = window.matchMedia("(max-width: 700px)");
-    const toc = document.querySelector(".toc");
     const phonePrev = document.querySelector("#phone-prev");
     const phoneNext = document.querySelector("#phone-next");
     const phoneIndex = document.querySelector("#phone-index");
 
     function closeReading() {
-      chapters.forEach((chapter) => {
+      chapters().forEach((chapter) => {
         chapter.open = false;
         chapter.querySelectorAll("details.block").forEach((block) => { block.open = false; });
       });
@@ -1592,15 +2257,22 @@
       }
       closeReading();
       chapter.open = true;
-      toc.open = true;
+      activeToc().open = true;
       chapter.scrollIntoView({ block: "start" });
       paintGuide();
     }
 
     function paintGuide() {
-      const index = chapters.findIndex((chapter) => chapter.open);
+      const index = chapters().findIndex((chapter) => chapter.open);
       phonePrev.disabled = index < 0;
-      phoneNext.disabled = index === chapters.length - 1;
+      phoneNext.disabled = index === chapters().length - 1;
+    }
+
+    function closeEveryChapter() {
+      allChapters().forEach((chapter) => {
+        chapter.open = false;
+        chapter.querySelectorAll("details.block").forEach((block) => { block.open = false; });
+      });
     }
 
     function enterPhone() {
@@ -1608,32 +2280,32 @@
         paintGuide();
         return;
       }
-      closeReading();
-      toc.open = true;
+      closeEveryChapter();
+      activeToc().open = true;
       if (location.hash) openTarget(location.hash.slice(1));
       paintGuide();
     }
 
     function leavePhone() {
-      chapters.forEach((chapter) => {
+      chapters().forEach((chapter) => {
         chapter.open = true;
         chapter.querySelectorAll("details.block").forEach((block) => { block.open = true; });
       });
-      toc.open = true;
+      activeToc().open = true;
     }
 
     phonePrev.addEventListener("click", () => {
-      const index = chapters.findIndex((chapter) => chapter.open);
+      const index = chapters().findIndex((chapter) => chapter.open);
       if (index === 0) {
         closeReading();
         window.scrollTo({ top: 0, behavior: "smooth" });
         paintGuide();
-      } else if (index > 0) showChapter(chapters[index - 1]);
+      } else if (index > 0) showChapter(chapters()[index - 1]);
     });
     phoneNext.addEventListener("click", () => {
-      const index = chapters.findIndex((chapter) => chapter.open);
-      if (index < 0) showChapter(chapters[0]);
-      else if (index < chapters.length - 1) showChapter(chapters[index + 1]);
+      const index = chapters().findIndex((chapter) => chapter.open);
+      if (index < 0) showChapter(chapters()[0]);
+      else if (index < chapters().length - 1) showChapter(chapters()[index + 1]);
     });
     phoneIndex.addEventListener("click", () => {
       if (input.value.trim()) {
@@ -1641,19 +2313,50 @@
         apply("");
       }
       closeReading();
-      toc.open = true;
+      activeToc().open = true;
       window.scrollTo({ top: 0, behavior: "smooth" });
       paintGuide();
     });
 
+    function setSubject(subject) {
+      document.body.dataset.subject = subject;
+      document.querySelectorAll(".subjects button").forEach((button) => {
+        button.setAttribute("aria-selected", String(button.dataset.subject === subject));
+      });
+      const title = document.querySelector("h1");
+      title.textContent = subject === "social" ? "사회 노트" : "조선 시대 노트";
+      document.title = title.textContent;
+      input.placeholder = subject === "social" ? "예: 인구 밀도" : "예: 대동법";
+      rebuildTerms();
+      if (window.refreshLearn) window.refreshLearn();
+      if (phoneQuery.matches) enterPhone();
+      else leavePhone();
+    }
+
+    function setSocialView(view) {
+      document.body.dataset.socialView = view;
+      document.querySelectorAll(".viewbar button").forEach((button) => {
+        button.setAttribute("aria-selected", String(button.dataset.socialView === view));
+      });
+      rebuildTerms();
+      if (phoneQuery.matches) enterPhone();
+      else leavePhone();
+    }
+
     window.showNotes = function (id) {
+      const target = id ? document.getElementById(id) : null;
+      if (target && target.closest("#social")) {
+        setSubject("social");
+        setSocialView("struct");
+      } else if (target && target.closest("#history")) {
+        setSubject("history");
+      }
       setTab("notes", false);
       if (!id) return;
       openTarget(id);
-      const target = document.getElementById(id);
       if (phoneQuery.matches && target) {
         const chapter = target.matches("details.chapter") ? target : target.closest("details.chapter");
-        if (chapter) chapters.forEach((item) => { if (item !== chapter) item.open = false; });
+        if (chapter) chapters().forEach((item) => { if (item !== chapter) item.open = false; });
         paintGuide();
       }
       if (target) target.scrollIntoView({ block: "start" });
@@ -1661,16 +2364,31 @@
     document.querySelectorAll(".tabs button").forEach((button) => {
       button.addEventListener("click", () => setTab(button.dataset.tab, true));
     });
+    document.querySelectorAll(".subjects button").forEach((button) => {
+      button.addEventListener("click", () => {
+        setSubject(button.dataset.subject);
+        window.scrollTo({ top: 0, behavior: "auto" });
+      });
+    });
+    document.querySelectorAll(".viewbar button").forEach((button) => {
+      button.addEventListener("click", () => setSocialView(button.dataset.socialView));
+    });
 
     document.querySelectorAll("a[href^='#']").forEach((link) => {
       link.addEventListener("click", () => {
+        if (link.closest("#social")) {
+          setSubject("social");
+          setSocialView("struct");
+        } else if (link.closest("#history") || link.closest(".timeline")) {
+          setSubject("history");
+        }
         setTab("notes", false);
         const id = link.getAttribute("href").slice(1);
         openTarget(id);
         if (!phoneQuery.matches) return;
         const target = document.getElementById(id);
         const chapter = target && (target.matches("details.chapter") ? target : target.closest("details.chapter"));
-        if (chapter) chapters.forEach((item) => { if (item !== chapter) item.open = false; });
+        if (chapter) chapters().forEach((item) => { if (item !== chapter) item.open = false; });
         paintGuide();
       });
     });
@@ -1695,6 +2413,7 @@
       paintTheme(next);
     });
   </script>
+  <script src="social.js"></script>
   <script src="learn.js"></script>
 </body>
 </html>

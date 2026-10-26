@@ -725,20 +725,31 @@
     }
   ];
 
-  function withAnswers(exams) {
-    if (exams.length !== 5) throw new Error("시험은 5회여야 합니다.");
+  function withAnswers(exams, ids) {
+    const allowed = ids || NOTE_IDS;
     exams.forEach((exam) => {
-      if (exam.questions.length !== 10) throw new Error(exam.title + " 문항 수");
+      if (!exam.questions || exam.questions.length < 5) throw new Error(exam.title + " 문항 수");
       exam.questions.forEach((q, i) => {
         if (!q.choices || q.choices.length !== 5) throw new Error(exam.title + " " + (i + 1) + " 선택지");
         const at = q.choices.indexOf(q.key);
         if (at < 0) throw new Error(exam.title + " " + (i + 1) + " 정답 문장이 선택지에 없습니다.");
         q.answer = at;
         if (![3, 4, 5].includes(q.points)) throw new Error(exam.title + " 배점");
-        if (NOTE_IDS.indexOf(q.note) < 0) throw new Error("없는 노트 " + q.note);
+        if (allowed.indexOf(q.note) < 0) throw new Error("없는 노트 " + q.note);
         if (!q.explain) throw new Error(exam.title + " 해설");
       });
     });
+  }
+
+  function pack() {
+    if (document.body.dataset.subject === "social" && window.SOCIAL) {
+      return { chapters: window.SOCIAL.chapters, study: window.SOCIAL.study, exams: window.SOCIAL.exams };
+    }
+    return { chapters: CHAPTERS, study: STUDY, exams: EXAMS };
+  }
+
+  function examStore() {
+    return document.body.dataset.subject === "social" ? "social-exams" : "history-exams";
   }
 
   function compact(text) {
@@ -777,17 +788,22 @@
   }
 
   function loadResults() {
-    try { return JSON.parse(localStorage.getItem("history-exams") || "{}"); }
+    try { return JSON.parse(localStorage.getItem(examStore()) || "{}"); }
     catch (error) { return {}; }
   }
 
   function saveResult(id, result) {
     const all = loadResults();
     all[id] = result;
-    localStorage.setItem("history-exams", JSON.stringify(all));
+    localStorage.setItem(examStore(), JSON.stringify(all));
   }
 
+  if (EXAMS.length !== 5) throw new Error("역사 시험은 5회입니다.");
   withAnswers(EXAMS);
+  if (window.SOCIAL) {
+    if (window.SOCIAL.exams.length !== 12) throw new Error("사회 시험은 단원당 3회, 모두 12회입니다.");
+    withAnswers(window.SOCIAL.exams, window.SOCIAL.ids);
+  }
 
   if (typeof document === "undefined") {
     const total = EXAMS.reduce((sum, exam) => sum + exam.questions.length, 0);
@@ -798,6 +814,11 @@
   NOTE_IDS.forEach((id) => {
     if (!document.getElementById(id)) console.error("노트 앵커 없음: " + id);
   });
+  if (window.SOCIAL) {
+    window.SOCIAL.ids.forEach((id) => {
+      if (!document.getElementById(id)) console.error("사회 노트 앵커 없음: " + id);
+    });
+  }
 
   const MARKS = ["①", "②", "③", "④", "⑤"];
   const studyRoot = document.querySelector("#study");
@@ -836,7 +857,7 @@
       mode.appendChild(option);
     });
     const chapter = document.createElement("select");
-    CHAPTERS.forEach((pair) => {
+    pack().chapters.forEach((pair) => {
       const option = document.createElement("option");
       option.value = pair[0];
       option.textContent = pair[1];
@@ -851,7 +872,7 @@
     start.addEventListener("click", () => {
       studyMode = mode.value;
       studyChapter = chapter.value;
-      const bank = studyMode === "memory" ? STUDY.memory : STUDY.understand;
+      const bank = studyMode === "memory" ? pack().study.memory : pack().study.understand;
       const pool = bank.filter((item) => studyChapter === "all" || item.chapter === studyChapter);
       session = { mode: studyMode, items: shuffle(pool).slice(0, Math.min(10, pool.length)), index: 0, misses: [] };
       renderStudyCard();
@@ -985,7 +1006,7 @@
     const list = document.createElement("div");
     list.className = "exam-list";
     const saved = loadResults();
-    EXAMS.forEach((exam) => {
+    pack().exams.forEach((exam) => {
       const card = document.createElement("article");
       const name = document.createElement("h3");
       name.textContent = exam.title + " · " + exam.range;
@@ -1164,4 +1185,9 @@
 
   renderStudyHome();
   renderExamHome();
+  window.refreshLearn = function () {
+    session = null;
+    renderStudyHome();
+    renderExamHome();
+  };
 })();
